@@ -38,6 +38,11 @@ on:
         required: true
         type: string
 
+    outputs:
+      metadata:
+        description: "docker metadata"
+        value: ${{ jobs.docker-build-push-google.outputs.metadata }}
+
 jobs:
   docker-build-push-google:
     runs-on:
@@ -46,6 +51,9 @@ jobs:
     permissions:
       contents: read
       id-token: write
+
+    outputs:
+      metadata: ${{ steps.meta.outputs.json }}
 
     steps:
       # https://github.com/marketplace/actions/checkout
