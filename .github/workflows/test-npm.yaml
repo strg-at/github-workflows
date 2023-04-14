@@ -1,0 +1,58 @@
+---
+name: test npm
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: "github actions runner"
+        required: true
+        type: string
+
+jobs:
+  test-npm:
+    runs-on:
+      - self-hosted
+      - ${{ inputs.runner }}
+
+    steps:
+      # https://github.com/marketplace/actions/checkout
+      - name: checkout
+        uses: actions/checkout@v3.5.0
+
+      # https://github.com/marketplace/actions/cache
+      - name: cache node modules
+        id: cache-npm
+        uses: actions/cache@v3.3.1
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+
+      # https://github.com/marketplace/actions/setup-node-js-environment
+      - name: setup node.js
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: list the state of node modules
+        if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+        continue-on-error: true
+        run: npm list
+
+      - name: install
+        run: npm ci
+
+      - name: audit
+        run: npm audit --production
+
+      - name: lint
+        run: npm run lint
+
+      - name: test
+        run: npm run test
+
+      - name: build
+        run: npm run build

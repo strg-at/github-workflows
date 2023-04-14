@@ -1,0 +1,102 @@
+---
+name: update image tag of helm-release
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: "github actions runner"
+        required: true
+        type: string
+      tag:
+        description: "github.event.client_payload.ref|sha"
+        required: true
+        type: string
+      github-app-id:
+        description: "github app id for commit / create pr"
+        required: true
+        type: string
+      github-app-key:
+        description: "github app private key for commmit / create pr"
+        required: true
+        type: string
+      file-path:
+        description: "kubernetes/customer/integration/service/app/helm-values.yaml"
+        required: true
+        type: string
+      create-pr:
+        description: "true | false"
+        required: true
+        type: boolean
+        default: true
+      destination-branch:
+        description: "main"
+        required: true
+        type: string
+      commit-message:
+        description: "chore(app): update to"
+        required: true
+        type: string
+        default: "chore: update to"
+
+jobs:
+  tag-update-helm:
+    runs-on:
+      - self-hosted
+      - ${{ inputs.runner }}
+    permissions:
+      contents: write
+
+    steps:
+      # https://github.com/marketplace/actions/checkout
+      - name: checkout repository
+        uses: actions/checkout@v3.5.0
+
+      # https://github.com/marketplace/actions/install-gh-cli
+      - name: install github cli
+        uses: dev-hanz-ops/install-gh-cli-action@v0.1.0
+
+      # https://github.com/marketplace/actions/setup-yq
+      - name: update image tag of helm-release
+        uses: mikefarah/yq@v4.33.2
+        with:
+          cmd: yq -i '.spec.values.image.tag = "${{ inputs.tag }}"' ${{ inputs.file-path }}
+
+      # https://github.com/marketplace/actions/github-app-token
+      - name: generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1.8.0
+        env:
+          # https://github.com/tibdex/github-app-token/issues/54
+          # https://stackoverflow.com/questions/72104449/node-js-crypto-fails-to-sign-pem-key-string-from-file-with-error25066067dso-su
+          OPENSSL_CONF: /dev/null
+        with:
+          app_id: ${{ inputs.github-app-id }}
+          private_key: ${{ inputs.github-app-key }}
+
+      - name: commit
+        if: "${{ inputs.create-pr == 'false' }}"
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          export SHA=$( git rev-parse ${{ inputs.destination-branch }}:${{ inputs.file-path }} )
+          export CONTENT=$( base64 -i ${{ inputs.file-path }} )
+          gh api --method PUT /repos/${{ github.repository }}/contents/${{ inputs.file-path }} \
+            --field message="${{ inputs.commit-message }} ${{ inputs.tag }}" \
+            --field content="$CONTENT" \
+            --field encoding="base64" \
+            --field branch="${{ inputs.destination-branch }}" \
+            --field sha="$SHA"
+
+      # https://github.com/marketplace/actions/pull-request-action
+      - name: create pr
+        uses: peter-evans/create-pull-request@v5.0.0
+        if: "${{ inputs.create-pr == 'true' }}"
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          add-paths: ${{ inputs.file-path }}
+          commit-message: ${{ inputs.commit-message }}
+          committer: ${{ github.actor }}
+          author: ${{ github.actor }}
+          branch: release/${{ inputs.tag }}
+          base: ${{ inputs.destination-branch }}
