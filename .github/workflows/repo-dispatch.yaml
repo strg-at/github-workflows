@@ -8,14 +8,6 @@ on:
         description: "github actions runner"
         required: true
         type: string
-      github-app-id:
-        description: "github app id for dispatch"
-        required: true
-        type: string
-      github-app-key:
-        description: "github app private key for dispatch"
-        required: true
-        type: string
       sha:
         description: "sha from docker metadata"
         required: false
@@ -29,6 +21,13 @@ on:
         description: "event name that is configured in target repo"
         required: true
         type: string
+    secrets:
+      github-app-id:
+        description: "github app id for dispatch"
+        required: true
+      github-app-key:
+        description: "github app private key for dispatch"
+        required: true
 
 jobs:
   repo-dispatch:
@@ -46,8 +45,8 @@ jobs:
           # https://stackoverflow.com/questions/72104449/node-js-crypto-fails-to-sign-pem-key-string-from-file-with-error25066067dso-su
           OPENSSL_CONF: /dev/null
         with:
-          app_id: ${{ inputs.github-app-id }}
-          private_key: ${{ inputs.github-app-key }}
+          app_id: ${{ secrets.github-app-id }}
+          private_key: ${{ secrets.github-app-key }}
 
       # send event to remote repo to update helm-release image tag
       # https://github.com/marketplace/actions/repository-dispatch
