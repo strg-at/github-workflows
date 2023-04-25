@@ -1,11 +1,31 @@
 ---
-name: build and push docker image
+name: build and push docker image to google
 
 on:
   workflow_call:
     inputs:
       runner:
         description: "github actions runner"
+        required: true
+        type: string
+      workload-identity-provider:
+        description: "projects/<number>/locations/global/..."
+        required: true
+        type: string
+      service-account:
+        description: "github-artifactregistry@..."
+        required: true
+        type: string
+      registry:
+        description: "registry url"
+        required: true
+        type: string
+      gcp:
+        description: "google cloud project id"
+        required: true
+        type: string
+      repository:
+        description: "registry repo"
         required: true
         type: string
       image_name:
@@ -21,15 +41,16 @@ on:
     outputs:
       metadata:
         description: "docker metadata"
-        value: ${{ jobs.docker-build-push.outputs.metadata }}
+        value: ${{ jobs.docker-build-push-google.outputs.metadata }}
 
 jobs:
-  docker-build-push:
+  docker-build-push-google:
     runs-on:
       - self-hosted
       - ${{ inputs.runner }}
     permissions:
       contents: read
+      id-token: write
 
     outputs:
       metadata: ${{ steps.meta.outputs.json }}
@@ -56,19 +77,43 @@ jobs:
         with:
           driver: docker
 
+      # https://github.com/marketplace/actions/authenticate-to-google-cloud
+      - name: authenticate to google cloud
+        id: auth
+        uses: "google-github-actions/auth@v1.0.0"
+        with:
+          token_format: "access_token"
+          workload_identity_provider: ${{ inputs.workload-identity-provider }}
+          service_account: ${{ inputs.service-account }}
+
+      # https://github.com/marketplace/actions/docker-login
+      - name: log into registry
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ inputs.registry }}
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
       # https://github.com/marketplace/actions/docker-metadata-action
       - name: extract metadata for docker
         id: meta
         uses: docker/metadata-action@v4.3.0
         with:
-          images: ${{ inputs.image_name }}
+          images: ${{ inputs.registry }}/${{ inputs.gcp }}/${{ inputs.repository }}/${{ inputs.image_name }}
           tags: ${{ inputs.tags }}
 
       # https://github.com/marketplace/actions/build-and-push-docker-images
       - name: build and push docker image
+        id: build-and-push
         uses: docker/build-push-action@v4.0.0
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      # https://github.com/sigstore/cosign
+      - name: sign the published docker image
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: cosign sign ${{ inputs.registry }}/${{ inputs.gcp }}/${{ inputs.repository }}/${{ inputs.image_name }}@${{ steps.build-and-push.outputs.digest }}

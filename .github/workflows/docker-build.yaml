@@ -16,7 +16,6 @@ jobs:
       - ${{ inputs.runner }}
     permissions:
       contents: read
-      id-token: write
 
     steps:
       # https://github.com/marketplace/actions/checkout
