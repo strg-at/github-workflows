@@ -12,32 +12,32 @@ on:
         description: "github.event.client_payload.ref|sha"
         required: true
         type: string
-      github-app-id:
-        description: "github app id for commit / create pr"
-        required: true
-        type: string
-      github-app-key:
-        description: "github app private key for commmit / create pr"
-        required: true
-        type: string
       file-path:
         description: "kubernetes/customer/integration/service/app/helm-values.yaml"
         required: true
         type: string
       create-pr:
         description: "true | false"
-        required: true
+        required: false
         type: boolean
         default: true
       destination-branch:
         description: "main"
-        required: true
+        required: false
         type: string
+        default: main
       commit-message:
         description: "chore(app): update to"
-        required: true
+        required: false
         type: string
         default: "chore: update to"
+    secrets:
+      github-app-id:
+        description: "github app id for commit / create pr"
+        required: true
+      github-app-key:
+        description: "github app private key for commmit / create pr"
+        required: true
 
 jobs:
   tag-update-helm:
@@ -71,8 +71,8 @@ jobs:
           # https://stackoverflow.com/questions/72104449/node-js-crypto-fails-to-sign-pem-key-string-from-file-with-error25066067dso-su
           OPENSSL_CONF: /dev/null
         with:
-          app_id: ${{ inputs.github-app-id }}
-          private_key: ${{ inputs.github-app-key }}
+          app_id: ${{ secrets.github-app-id }}
+          private_key: ${{ secrets.github-app-key }}
 
       - name: commit
         if: "${{ inputs.create-pr == 'false' }}"
