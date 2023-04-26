@@ -8,11 +8,11 @@ on:
         description: "github actions runner"
         required: true
         type: string
-      push-workload-identity-provider:
+      workload-identity-provider:
         description: "projects/<number>/locations/global/..."
         required: true
         type: string
-      push-service-account:
+      service-account:
         description: "github-artifactregistry@..."
         required: true
         type: string
@@ -58,8 +58,8 @@ jobs:
         uses: "google-github-actions/auth@v1.0.0"
         with:
           token_format: "access_token"
-          workload_identity_provider: ${{ inputs.push-workload-identity-provider }}
-          service_account: ${{ inputs.push-service-account }}
+          workload_identity_provider: ${{ inputs.workload-identity-provider }}
+          service_account: ${{ inputs.service-account }}
 
       # https://github.com/marketplace/actions/docker-login
       - name: log into registry
