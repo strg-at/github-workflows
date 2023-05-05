@@ -1,0 +1,62 @@
+---
+name: repo-dispatch
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: "github actions runner"
+        required: true
+        type: string
+      sha:
+        description: "sha from docker metadata"
+        required: false
+        type: string
+        default: null
+      repository:
+        description: "target repository"
+        required: true
+        type: string
+      dispatch-event:
+        description: "event name that is configured in target repo"
+        required: true
+        type: string
+    secrets:
+      github-app-id:
+        description: "github app id for dispatch"
+        required: true
+      github-app-key:
+        description: "github app private key for dispatch"
+        required: true
+
+jobs:
+  repo-dispatch:
+    runs-on:
+      - self-hosted
+      - ${{ inputs.runner }}
+
+    steps:
+      # https://github.com/marketplace/actions/github-app-token
+      - name: generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1.8.0
+        env:
+          # https://github.com/tibdex/github-app-token/issues/54
+          # https://stackoverflow.com/questions/72104449/node-js-crypto-fails-to-sign-pem-key-string-from-file-with-error25066067dso-su
+          OPENSSL_CONF: /dev/null
+        with:
+          app_id: ${{ secrets.github-app-id }}
+          private_key: ${{ secrets.github-app-key }}
+
+      # send event to remote repo to update helm-release image tag
+      # https://github.com/marketplace/actions/repository-dispatch
+      - name: repository dispatch
+        uses: peter-evans/repository-dispatch@v2.1.1
+        env:
+          token: ${{ steps.generate_token.outputs.token }}
+          sha: ${{ inputs.sha }}
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          repository: ${{ inputs.repository }}
+          event-type: ${{ inputs.dispatch-event }}
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ inputs.sha }}"}'
