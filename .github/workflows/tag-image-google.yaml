@@ -28,7 +28,7 @@ on:
         description: "registry repo"
         required: true
         type: string
-      image_name:
+      image:
         description: "image name - default to repo name"
         required: false
         type: string
