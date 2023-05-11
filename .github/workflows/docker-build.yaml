@@ -8,6 +8,11 @@ on:
         description: "github actions runner"
         required: true
         type: string
+      context:
+        description: "path to Dockerfile - default ."
+        required: false
+        type: string
+        default: .
 
 jobs:
   docker-build:
@@ -37,6 +42,6 @@ jobs:
       - name: build docker image
         uses: docker/build-push-action@v4.0.0
         with:
-          context: .
+          context: ${{ inputs.context }}
           push: false
           tags: ${{ github.sha }}
