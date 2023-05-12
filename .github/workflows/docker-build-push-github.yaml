@@ -94,8 +94,4 @@ jobs:
 
       # https://github.com/sigstore/cosign
       - name: sign the published docker image
-        env:
-          # COSIGN_EXPERIMENTAL is used for keyless signatures
-          # https://docs.sigstore.dev/cosign/keyless/
-          COSIGN_EXPERIMENTAL: "true"
-        run: cosign sign ${{ env.image-path }}@${{ steps.build-and-push.outputs.digest }}
+        run: cosign sign --yes ${{ env.image-path }}@${{ steps.build-and-push.outputs.digest }}
