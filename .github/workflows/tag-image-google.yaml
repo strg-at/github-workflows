@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       runner:
-        description: "github actions runner"
+        description: '["self-hosted", "some-runner"]'
         required: true
         type: string
       workload-identity-provider:
@@ -40,9 +40,7 @@ on:
 
 jobs:
   tag-image-google:
-    runs-on:
-      - self-hosted
-      - ${{ inputs.runner }}
+    runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
       id-token: write
