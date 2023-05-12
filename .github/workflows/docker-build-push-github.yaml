@@ -39,6 +39,7 @@ jobs:
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
+      id-token: write
       packages: write
     env:
       image-path: ${{ inputs.registry }}/${{ github.repository }}/${{ inputs.image }}
