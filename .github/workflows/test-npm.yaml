@@ -5,15 +5,13 @@ on:
   workflow_call:
     inputs:
       runner:
-        description: "github actions runner"
+        description: '["self-hosted", "some-runner"]'
         required: true
         type: string
 
 jobs:
   test-npm:
-    runs-on:
-      - self-hosted
-      - ${{ inputs.runner }}
+    runs-on: ${{fromJSON(inputs.runner)}}
 
     steps:
       # https://github.com/marketplace/actions/checkout

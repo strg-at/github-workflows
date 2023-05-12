@@ -5,15 +5,18 @@ on:
   workflow_call:
     inputs:
       runner:
-        description: "github actions runner"
+        description: '["self-hosted", "some-runner"]'
         required: true
         type: string
+      context:
+        description: "path to Dockerfile - default ."
+        required: false
+        type: string
+        default: .
 
 jobs:
   docker-build:
-    runs-on:
-      - self-hosted
-      - ${{ inputs.runner }}
+    runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
 
@@ -37,6 +40,6 @@ jobs:
       - name: build docker image
         uses: docker/build-push-action@v4.0.0
         with:
-          context: .
+          context: ${{ inputs.context }}
           push: false
           tags: ${{ github.sha }}
