@@ -39,6 +39,7 @@ jobs:
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
+      id-token: write
       packages: write
     env:
       image-path: ${{ inputs.registry }}/${{ github.repository }}/${{ inputs.image }}
@@ -53,8 +54,6 @@ jobs:
       # https://github.com/marketplace/actions/cosign-installer
       - name: setup cosign
         uses: sigstore/cosign-installer@v3.0.2
-        with:
-          cosign-release: v1.13.1
 
       # Workaround: https://github.com/docker/build-push-action/issues/461
       # https://github.com/marketplace/actions/docker-setup-qemu
@@ -95,8 +94,4 @@ jobs:
 
       # https://github.com/sigstore/cosign
       - name: sign the published docker image
-        env:
-          # COSIGN_EXPERIMENTAL is used for keyless signatures
-          # https://docs.sigstore.dev/cosign/keyless/
-          COSIGN_EXPERIMENTAL: "true"
-        run: cosign sign ${{ env.image-path }}@${{ steps.build-and-push.outputs.digest }}
+        run: cosign sign --yes ${{ env.image-path }}@${{ steps.build-and-push.outputs.digest }}
