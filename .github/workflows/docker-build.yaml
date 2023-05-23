@@ -13,13 +13,24 @@ on:
         required: false
         type: string
         default: .
+      generate-token:
+        required: false
+        type: boolean
+        default: false
+
+    secrets:
+      github-app-id:
+        description: "github app id"
+        required: false
+      github-app-key:
+        description: "github app private key"
+        required: false
 
 jobs:
   docker-build:
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
-
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
@@ -36,6 +47,19 @@ jobs:
         with:
           driver: docker
 
+      # https://github.com/marketplace/actions/github-app-token
+      - name: generate token
+        if: ${{ inputs.generate-token }}
+        id: generate-token
+        uses: tibdex/github-app-token@v1.8.0
+        env:
+          # https://github.com/tibdex/github-app-token/issues/54
+          # https://stackoverflow.com/questions/72104449/node-js-crypto-fails-to-sign-pem-key-string-from-file-with-error25066067dso-su
+          OPENSSL_CONF: /dev/null
+        with:
+          app_id: ${{ secrets.github-app-id }}
+          private_key: ${{ secrets.github-app-key }}
+
       # https://github.com/marketplace/actions/build-and-push-docker-images
       - name: build docker image
         uses: docker/build-push-action@v4.0.0
@@ -43,3 +67,5 @@ jobs:
           context: ${{ inputs.context }}
           push: false
           tags: ${{ github.sha }}
+          secrets: |
+            "gh-read-token=${{ steps.generate-token.outputs.token }}"
