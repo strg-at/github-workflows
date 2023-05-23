@@ -19,10 +19,10 @@ on:
         default: false
     secrets:
       github-app-id:
-        description: "github app id for dispatch"
+        description: "github app id"
         required: false
       github-app-key:
-        description: "github app private key for dispatch"
+        description: "github app private key"
         required: false
 
 jobs:
