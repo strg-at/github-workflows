@@ -34,9 +34,12 @@ jobs:
         run: |
           if [ "${{ secrets.github-app-id }}" != '' ] && [ "${{ secrets.github-app-key }}" != '' ]; then
             echo "defined=true" >> $GITHUB_OUTPUT;
+            echo true;
           else
             echo "defined=false" >> $GITHUB_OUTPUT;
+            echo false;
           fi
+          echo
 
   docker-build:
     runs-on: ${{fromJSON(inputs.runner)}}
