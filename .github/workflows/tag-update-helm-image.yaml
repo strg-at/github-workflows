@@ -62,7 +62,7 @@ jobs:
 
       # https://github.com/marketplace/actions/github-app-token
       - name: generate token
-        id: generate_token
+        id: generate-token
         uses: tibdex/github-app-token@v1.8.0
         env:
           # https://github.com/tibdex/github-app-token/issues/54
@@ -75,7 +75,7 @@ jobs:
       - name: commit
         if: "${{ inputs.create-pr == 'false' }}"
         env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           export SHA=$( git rev-parse ${{ inputs.destination-branch }}:${{ inputs.file-path }} )
           export CONTENT=$( base64 -i ${{ inputs.file-path }} )
@@ -91,7 +91,7 @@ jobs:
         uses: peter-evans/create-pull-request@v5.0.0
         if: "${{ inputs.create-pr == 'true' }}"
         with:
-          token: ${{ steps.generate_token.outputs.token }}
+          token: ${{ steps.generate-token.outputs.token }}
           add-paths: ${{ inputs.file-path }}
           commit-message: ${{ inputs.commit-message }}
           committer: ${{ github.actor }}
