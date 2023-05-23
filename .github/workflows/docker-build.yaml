@@ -28,7 +28,6 @@ on:
 jobs:
   docker-build:
     runs-on: ${{fromJSON(inputs.runner)}}
-    needs: check-secret
     permissions:
       contents: read
     steps:
