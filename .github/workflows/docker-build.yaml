@@ -19,14 +19,30 @@ on:
         required: false
       github-app-key:
         description: "github app private key for dispatch"
-        required: false    
+        required: false
 
 jobs:
+  check-secret:
+    runs-on: ${{fromJSON(inputs.runner)}}
+    outputs:
+      token-available: ${{ steps.secret-check.outputs.defined }}
+    steps:
+      - name: Check for github app secrets
+        id: secret-check
+        # perform secret check & put boolean result as an output
+        shell: bash
+        run: |
+          if [ "${{ secrets.github-app-id }}" != '' ] && [ "${{ secrets.github-app-key }}" != '' ]; then
+            echo "defined=true" >> $GITHUB_OUTPUT;
+          else
+            echo "defined=false" >> $GITHUB_OUTPUT;
+          fi
+
   docker-build:
     runs-on: ${{fromJSON(inputs.runner)}}
+    needs: check-secret
     permissions:
       contents: read
-
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
@@ -42,10 +58,10 @@ jobs:
         uses: docker/setup-buildx-action@v2.5.0
         with:
           driver: docker
-      
+
       # https://github.com/marketplace/actions/github-app-token
       - name: generate token
-        if: ${{ secrets.github-app-id }} && ${{ secrets.github-app-key }}
+        if: ${{ needs.check-secret.outputs.token-available }}
         id: generate-token
         uses: tibdex/github-app-token@v1.8.0
         env:
