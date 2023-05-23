@@ -13,6 +13,10 @@ on:
         required: false
         type: string
         default: .
+      generate-token:
+        required: false
+        type: boolean
+        default: false
     secrets:
       github-app-id:
         description: "github app id for dispatch"
@@ -22,25 +26,6 @@ on:
         required: false
 
 jobs:
-  check-secret:
-    runs-on: ${{fromJSON(inputs.runner)}}
-    outputs:
-      token-available: ${{ steps.secret-check.outputs.defined }}
-    steps:
-      - name: Check for github app secrets
-        id: secret-check
-        # perform secret check & put boolean result as an output
-        shell: bash
-        run: |
-          if [ "${{ secrets.github-app-id }}" != '' ] && [ "${{ secrets.github-app-key }}" != '' ]; then
-            echo "defined=true" >> $GITHUB_OUTPUT;
-            echo true;
-          else
-            echo "defined=false" >> $GITHUB_OUTPUT;
-            echo false;
-          fi
-          echo
-
   docker-build:
     runs-on: ${{fromJSON(inputs.runner)}}
     needs: check-secret
@@ -64,7 +49,7 @@ jobs:
 
       # https://github.com/marketplace/actions/github-app-token
       - name: generate token
-        if: ${{ needs.check-secret.outputs.token-available }}
+        if: ${{ inputs.generate-token }}
         id: generate-token
         uses: tibdex/github-app-token@v1.8.0
         env:
