@@ -43,6 +43,11 @@ on:
         required: false
         type: string
         default: .
+      file:
+       description: "name of Dockerfile"
+       required: false
+       type: string
+       default: Dockerfile
       generate-token:
         required: false
         type: boolean
