@@ -44,10 +44,10 @@ on:
         type: string
         default: .
       file:
-       description: "name of Dockerfile"
-       required: false
-       type: string
-       default: Dockerfile
+        description: "name of Dockerfile"
+        required: false
+        type: string
+        default: Dockerfile
       generate-token:
         description: "generates token"
         required: false
