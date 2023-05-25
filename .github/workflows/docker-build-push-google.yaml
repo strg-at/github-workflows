@@ -49,6 +49,7 @@ on:
        type: string
        default: Dockerfile
       generate-token:
+        description: "generates token"
         required: false
         type: boolean
         default: false
@@ -141,6 +142,7 @@ jobs:
         uses: docker/build-push-action@v4.0.0
         with:
           context: ${{ inputs.context }}
+          file: ${{ inputs.file }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
