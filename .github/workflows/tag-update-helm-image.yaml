@@ -33,10 +33,10 @@ on:
         default: "chore: update to"
     secrets:
       github-app-id:
-        description: "github app id for commit / create pr"
+        description: "github app id"
         required: true
       github-app-key:
-        description: "github app private key for commmit / create pr"
+        description: "github app private key"
         required: true
 
 jobs:
@@ -44,7 +44,6 @@ jobs:
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: write
-
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository

@@ -13,21 +13,19 @@ on:
         required: false
         type: string
         default: "ghcr.io"
-      image:
-        description: "image name - default to repo name"
+      subpath:
+        description: "subpath if needed, f.e. app-name"
         required: false
         type: string
-        default: ${{ github.event.repository.name }}
       tags:
         description: "tags for image - default sha"
         required: false
         type: string
         default: ${{ github.sha }}
-      context:
-        description: "path to Dockerfile - default ."
+      file:
+        description: "path to Dockerfile"
         required: false
         type: string
-        default: .
 
     outputs:
       metadata:
@@ -36,13 +34,14 @@ on:
 
 jobs:
   docker-build-push-github:
+    name: github
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
       id-token: write
       packages: write
     env:
-      image-path: ${{ inputs.registry }}/${{ github.repository }}/${{ inputs.image }}
+      image-path: ${{ inputs.registry }}/${{ github.repository }}/${{ inputs.subpath }}
     outputs:
       metadata: ${{ steps.meta.outputs.json }}
 
@@ -87,8 +86,8 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v4.0.0
         with:
-          context: ${{ inputs.context }}
           push: true
+          file: ${{ inputs.file }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 

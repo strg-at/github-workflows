@@ -23,16 +23,15 @@ on:
         type: string
     secrets:
       github-app-id:
-        description: "github app id for dispatch"
+        description: "github app id"
         required: true
       github-app-key:
-        description: "github app private key for dispatch"
+        description: "github app private key"
         required: true
 
 jobs:
   repo-dispatch:
     runs-on: ${{fromJSON(inputs.runner)}}
-
     steps:
       # https://github.com/marketplace/actions/github-app-token
       - name: generate token

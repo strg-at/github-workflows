@@ -1,5 +1,5 @@
 ---
-name: tag image
+name: tag image in google
 
 on:
   workflow_call:
@@ -25,25 +25,28 @@ on:
         required: true
         type: string
       repository:
-        description: "registry repo"
+        description: "repository"
         required: true
         type: string
-      image:
-        description: "image name - default to repo name"
+      subpath:
+        description: "subpath to image, f.e. integration/app-name"
+        required: true
+        type: string
+      tags:
+        description: "tags for image - default sha"
         required: false
         type: string
-        default: ${{ github.event.repository.name }}
-      tags:
-        description: "tags for image"
-        required: true
-        type: string
+        default: ${{ github.sha }}
 
 jobs:
   tag-image-google:
+    name: google
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
       id-token: write
+    env:
+      image-path: ${{ inputs.gcp }}/${{ inputs.repository }}/${{ inputs.subpath }}
 
     steps:
       # https://github.com/marketplace/actions/checkout
@@ -67,4 +70,11 @@ jobs:
           username: oauth2accesstoken
           password: ${{ steps.auth.outputs.access_token }}
 
-      # TODO: tag image in registry
+      # https://github.com/marketplace/actions/docker-registry-tag
+      - name: tag image
+        uses: shrink/actions-docker-registry-tag@v3.0.0
+        with:
+          registry: ${{ inputs.registry }}
+          repository: ${{ env.image-path }}
+          target: ${{ github.sha }}
+          tags: ${{ inputs.tags }}
