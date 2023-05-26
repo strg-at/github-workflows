@@ -13,15 +13,14 @@ on:
         required: false
         type: string
         default: "ghcr.io"
-      subpath:
-        description: "subpath if needed, f.e. app-name"
-        required: false
+      source-path:
+        description: "path to source image"
+        required: true
         type: string
-      tags:
-        description: "tags for image - default sha"
-        required: false
+      target-path:
+        description: "path to target image"
+        required: true
         type: string
-        default: ${{ github.sha }}
 
 jobs:
   tag-image-github:
@@ -31,14 +30,8 @@ jobs:
       contents: read
       id-token: write
       packages: write
-    env:
-      image-path: ${{ github.repository }}/${{ inputs.subpath }}
 
     steps:
-      # https://github.com/marketplace/actions/checkout
-      - name: checkout repository
-        uses: actions/checkout@v3.5.0
-
       # https://github.com/marketplace/actions/docker-login
       - name: log into registry
         uses: docker/login-action@v2.1.0
@@ -47,11 +40,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # https://github.com/marketplace/actions/docker-registry-tag
-      - name: tag image
-        uses: shrink/actions-docker-registry-tag@v3.0.0
-        with:
-          registry: ${{ inputs.registry }}
-          repository: ${{ env.image-path }}
-          target: ${{ github.sha }}
-          tags: ${{ inputs.tags }}
+      - name: retag image
+        run: |
+          docker pull ${{ inputs.registry }}/${{ inputs.source-path }}:${{ github.sha }}
+          docker tag ${{ inputs.registry }}/${{ inputs.source-path }}:${{ github.sha }} ${{ inputs.registry }}/${{ inputs.target-path }}:${{ github.ref_name }}
+          docker push ${{ inputs.registry }}/${{ inputs.target-path }}:${{ github.ref_name }}
