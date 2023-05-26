@@ -13,6 +13,10 @@ on:
         required: false
         type: string
         default: "ghcr.io"
+      repository:
+        description: "repository"
+        required: true
+        type: string
       source-path:
         description: "path to source image"
         required: true
@@ -30,6 +34,8 @@ jobs:
       contents: read
       id-token: write
       packages: write
+    env:
+      base-path: ${{ inputs.registry }}/${{ inputs.repository }}
 
     steps:
       # https://github.com/marketplace/actions/docker-login
@@ -42,6 +48,6 @@ jobs:
 
       - name: retag image
         run: |
-          docker pull ${{ inputs.registry }}/${{ inputs.source-path }}:${{ github.sha }}
-          docker tag ${{ inputs.registry }}/${{ inputs.source-path }}:${{ github.sha }} ${{ inputs.registry }}/${{ inputs.target-path }}:${{ github.ref_name }}
-          docker push ${{ inputs.registry }}/${{ inputs.target-path }}:${{ github.ref_name }}
+          docker pull ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }}
+          docker tag ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }} ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
+          docker push ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
