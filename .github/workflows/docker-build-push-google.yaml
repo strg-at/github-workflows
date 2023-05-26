@@ -49,7 +49,7 @@ on:
         type: string
         default: Dockerfile
       generate-token:
-        description: "generates token"
+        description: "Generates token if its enabled. This token is used in case f.e. docker build needs access to github repos like case with composer."
         required: false
         type: boolean
         default: false
