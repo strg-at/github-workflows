@@ -41,6 +41,7 @@ on:
 
 jobs:
   tag-update-helm:
+    name: helm
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: write

@@ -28,15 +28,14 @@ on:
         description: "repository"
         required: true
         type: string
-      subpath:
-        description: "subpath to image, f.e. integration/app-name"
+      source-path:
+        description: "path to source image"
         required: true
         type: string
-      tags:
-        description: "tags for image - default sha"
-        required: false
+      target-path:
+        description: "path to target image"
+        required: true
         type: string
-        default: ${{ github.sha }}
 
 jobs:
   tag-image-google:
@@ -46,7 +45,7 @@ jobs:
       contents: read
       id-token: write
     env:
-      image-path: ${{ inputs.gcp }}/${{ inputs.repository }}/${{ inputs.subpath }}
+      base-path: ${{ inputs.registry }}/${{ inputs.gcp }}/${{ inputs.repository }}
 
     steps:
       # https://github.com/marketplace/actions/checkout
@@ -70,11 +69,8 @@ jobs:
           username: oauth2accesstoken
           password: ${{ steps.auth.outputs.access_token }}
 
-      # https://github.com/marketplace/actions/docker-registry-tag
-      - name: tag image
-        uses: shrink/actions-docker-registry-tag@v3.0.0
-        with:
-          registry: ${{ inputs.registry }}
-          repository: ${{ env.image-path }}
-          target: ${{ github.sha }}
-          tags: ${{ inputs.tags }}
+      - name: retag image
+        run: |
+          docker pull ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }}
+          docker tag ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }} ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
+          docker push ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
