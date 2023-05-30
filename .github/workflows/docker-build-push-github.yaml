@@ -26,6 +26,11 @@ on:
         description: "path to Dockerfile"
         required: false
         type: string
+      context:
+        description: "build context - default ."
+        required: false
+        type: string
+        default: .
 
     outputs:
       metadata:
@@ -88,6 +93,7 @@ jobs:
         with:
           push: true
           file: ${{ inputs.file }}
+          context: ${{ inputs.context }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
