@@ -8,8 +8,8 @@ on:
         description: '["self-hosted", "some-runner"]'
         required: true
         type: string
-      sha:
-        description: "sha from docker metadata"
+      tag:
+        description: "version tag from docker metadata"
         required: false
         type: string
         default: null
@@ -23,16 +23,15 @@ on:
         type: string
     secrets:
       github-app-id:
-        description: "github app id for dispatch"
+        description: "github app id"
         required: true
       github-app-key:
-        description: "github app private key for dispatch"
+        description: "github app private key"
         required: true
 
 jobs:
   repo-dispatch:
     runs-on: ${{fromJSON(inputs.runner)}}
-
     steps:
       # https://github.com/marketplace/actions/github-app-token
       - name: generate token
@@ -52,9 +51,9 @@ jobs:
         uses: peter-evans/repository-dispatch@v2.1.1
         env:
           token: ${{ steps.generate-token.outputs.token }}
-          sha: ${{ inputs.sha }}
+          tag: ${{ inputs.tag }}
         with:
           token: ${{ steps.generate-token.outputs.token }}
           repository: ${{ inputs.repository }}
           event-type: ${{ inputs.dispatch-event }}
-          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ inputs.sha }}"}'
+          client-payload: '{"ref": "${{ github.ref }}", "tag": "${{ inputs.tag }}"}'

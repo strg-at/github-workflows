@@ -8,8 +8,12 @@ on:
         description: '["self-hosted", "some-runner"]'
         required: true
         type: string
+      file:
+        description: "path to Dockerfile"
+        required: false
+        type: string
       context:
-        description: "path to Dockerfile - default ."
+        description: "build context - default ."
         required: false
         type: string
         default: .
@@ -64,8 +68,9 @@ jobs:
       - name: build docker image
         uses: docker/build-push-action@v4.0.0
         with:
-          context: ${{ inputs.context }}
           push: false
+          file: ${{ inputs.file }}
+          context: ${{ inputs.context }}
           tags: ${{ github.sha }}
           secrets: |
             "gh-read-token=${{ steps.generate-token.outputs.token }}"

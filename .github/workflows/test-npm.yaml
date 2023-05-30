@@ -12,7 +12,6 @@ on:
 jobs:
   test-npm:
     runs-on: ${{fromJSON(inputs.runner)}}
-
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout

@@ -1,5 +1,5 @@
 ---
-name: tag image in google
+name: tag image in github
 
 on:
   workflow_call:
@@ -8,22 +8,11 @@ on:
         description: '["self-hosted", "some-runner"]'
         required: true
         type: string
-      workload-identity-provider:
-        description: "projects/<number>/locations/global/..."
-        required: true
-        type: string
-      service-account:
-        description: "github-artifactregistry@..."
-        required: true
-        type: string
       registry:
         description: "registry url"
-        required: true
+        required: false
         type: string
-      gcp:
-        description: "google cloud project id"
-        required: true
-        type: string
+        default: "ghcr.io"
       repository:
         description: "repository"
         required: true
@@ -38,36 +27,24 @@ on:
         type: string
 
 jobs:
-  tag-image-google:
-    name: google
+  tag-image-github:
+    name: github
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
       id-token: write
+      packages: write
     env:
-      base-path: ${{ inputs.registry }}/${{ inputs.gcp }}/${{ inputs.repository }}
+      base-path: ${{ inputs.registry }}/${{ inputs.repository }}
 
     steps:
-      # https://github.com/marketplace/actions/checkout
-      - name: checkout repository
-        uses: actions/checkout@v3.5.0
-
-      # https://github.com/marketplace/actions/authenticate-to-google-cloud
-      - name: authenticate to google cloud
-        id: auth
-        uses: "google-github-actions/auth@v1.0.0"
-        with:
-          token_format: "access_token"
-          workload_identity_provider: ${{ inputs.workload-identity-provider }}
-          service_account: ${{ inputs.service-account }}
-
       # https://github.com/marketplace/actions/docker-login
       - name: log into registry
         uses: docker/login-action@v2.1.0
         with:
           registry: ${{ inputs.registry }}
-          username: oauth2accesstoken
-          password: ${{ steps.auth.outputs.access_token }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: retag image
         run: |

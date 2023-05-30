@@ -34,7 +34,6 @@ on:
 jobs:
   renovate:
     runs-on: ${{fromJSON(inputs.runner)}}
-
     steps:
       # https://github.com/marketplace/actions/github-app-token
       - name: generate token

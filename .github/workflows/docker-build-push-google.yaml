@@ -25,21 +25,24 @@ on:
         required: true
         type: string
       repository:
-        description: "registry repo"
+        description: "repository"
         required: true
         type: string
-      image:
-        description: "image name - default to repo name"
-        required: false
+      subpath:
+        description: "subpath to image name, f.e. integration/app-name"
+        required: true
         type: string
-        default: ${{ github.event.repository.name }}
       tags:
         description: "tags for image - default sha"
         required: false
         type: string
         default: ${{ github.sha }}
+      file:
+        description: "path to Dockerfile"
+        required: false
+        type: string
       context:
-        description: "path to Dockerfile - default ."
+        description: "build context - default ."
         required: false
         type: string
         default: .
@@ -63,12 +66,13 @@ on:
 
 jobs:
   docker-build-push-google:
+    name: google
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
       id-token: write
     env:
-      image-path: ${{ inputs.registry }}/${{ inputs.gcp }}/${{ inputs.repository }}/${{ inputs.image }}
+      image-path: ${{ inputs.registry }}/${{ inputs.gcp }}/${{ inputs.repository }}/${{ inputs.subpath }}
     outputs:
       metadata: ${{ steps.meta.outputs.json }}
 
@@ -135,8 +139,9 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v4.0.0
         with:
-          context: ${{ inputs.context }}
           push: true
+          file: ${{ inputs.file }}
+          context: ${{ inputs.context }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
