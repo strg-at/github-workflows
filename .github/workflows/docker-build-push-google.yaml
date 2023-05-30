@@ -29,7 +29,7 @@ on:
         required: true
         type: string
       subpath:
-        description: "subpath to image, f.e. integration/app-name"
+        description: "subpath to image name, f.e. integration/app-name"
         required: true
         type: string
       tags:

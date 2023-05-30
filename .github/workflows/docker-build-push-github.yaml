@@ -14,8 +14,8 @@ on:
         type: string
         default: "ghcr.io"
       subpath:
-        description: "subpath if needed, f.e. app-name"
-        required: false
+        description: "subpath to image name, f.e. integration/app-name"
+        required: true
         type: string
       tags:
         description: "tags for image - default sha"
