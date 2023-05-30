@@ -9,7 +9,7 @@ on:
         required: true
         type: string
       tag:
-        description: "github.event.client_payload.ref|sha"
+        description: "f.e. github.event.client_payload.tag"
         required: true
         type: string
       file-path:
@@ -73,7 +73,7 @@ jobs:
           private_key: ${{ secrets.github-app-key }}
 
       - name: commit
-        if: "${{ inputs.create-pr == 'false' }}"
+        if: ${{ !inputs.create-pr }}
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
@@ -89,7 +89,7 @@ jobs:
       # https://github.com/marketplace/actions/pull-request-action
       - name: create pr
         uses: peter-evans/create-pull-request@v5.0.0
-        if: "${{ inputs.create-pr == 'true' }}"
+        if: ${{ inputs.create-pr }}
         with:
           token: ${{ steps.generate-token.outputs.token }}
           add-paths: ${{ inputs.file-path }}
