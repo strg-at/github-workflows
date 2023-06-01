@@ -8,6 +8,26 @@ on:
         description: '["self-hosted", "some-runner"]'
         required: true
         type: string
+      audit-cmd:
+        description: npm audit --production
+        required: false
+        type: string
+        default: npm audit --production
+      lint-cmd:
+        description: npm run lint
+        required: false
+        type: string
+        default: npm run lint
+      test-cmd:
+        description: npm run test
+        required: false
+        type: string
+        default: npm run test
+      build-cmd:
+        description: npm run build
+        required: false
+        type: string
+        default: npm run build
 
 jobs:
   test-npm:
@@ -43,13 +63,13 @@ jobs:
         run: npm ci
 
       - name: audit
-        run: npm audit --production
+        run: ${{ inputs.audit-cmd }}
 
       - name: lint
-        run: npm run lint
+        run: ${{ inputs.lint-cmd }}
 
       - name: test
-        run: npm run test
+        run: ${{ inputs.test-cmd }}
 
       - name: build
-        run: npm run build
+        run: ${{ inputs.build-cmd }}
