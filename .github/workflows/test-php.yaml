@@ -1,0 +1,45 @@
+---
+name: test php
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: '["self-hosted", "some-runner"]'
+        required: true
+        type: string
+      php-cs-fixer-cmd:
+        description: optional args for php-cs-fixer
+        required: false
+        type: string
+        default: null
+      php-stan-cmd:
+        description: path(s) for php stan to check
+        required: false
+        type: string
+        default: analyse /src
+
+jobs:
+  test-php:
+    name: php
+    runs-on: ${{fromJSON(inputs.runner)}}
+    steps:
+      # https://github.com/marketplace/actions/checkout
+      - name: checkout
+        uses: actions/checkout@v3.5.0
+
+      # https://github.com/marketplace/actions/php-lint
+      - name: php-lint
+        uses: michaelw90/PHP-Lint@2.1.0
+
+      # https://github.com/marketplace/actions/oskar-php-cs-fixer
+      - name: php-cs-fixer
+        uses: OskarStark/php-cs-fixer-ga@3.17.0
+        with:
+          args: ${{ inputs.php-cs-fixer-cmd }}
+
+      # https://github.com/marketplace/actions/oskar-phpstan
+      - name: php-stan
+        uses: OskarStark/phpstan-ga@1.9.0
+        with:
+          args: ${{ inputs.php-stan-cmd }}
