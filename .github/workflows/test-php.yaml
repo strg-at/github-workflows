@@ -13,7 +13,7 @@ on:
         type: boolean
         default: true
       php-lint-cmd:
-        description: optional args for php-cs-fixer
+        description: optional args
         required: false
         type: string
         default: null
@@ -22,7 +22,7 @@ on:
         type: boolean
         default: false
       php-cs-fixer-cmd:
-        description: optional args for php-cs-fixer
+        description: optional args
         required: false
         type: string
         default: null
@@ -31,7 +31,7 @@ on:
         type: boolean
         default: false
       php-stan-cmd:
-        description: path(s) for php stan to check
+        description: path(s) to check and optional args
         required: false
         type: string
         default: analyse /src
@@ -55,13 +55,13 @@ jobs:
       # https://github.com/marketplace/actions/oskar-php-cs-fixer
       - name: php-cs-fixer
         if: ${{ inputs.php-cs-fixer }}
-        uses: OskarStark/php-cs-fixer-ga@3.17.0
+        uses: docker://oskarstark/php-cs-fixer-ga:3.17.0
         with:
           args: ${{ inputs.php-cs-fixer-cmd }}
 
       # https://github.com/marketplace/actions/oskar-phpstan
       - name: php-stan
         if: ${{ inputs.php-stan }}
-        uses: OskarStark/phpstan-ga@1.8.0
+        uses: docker://oskarstark/phpstan-ga:1.8.0
         with:
           args: ${{ inputs.php-stan-cmd }}
