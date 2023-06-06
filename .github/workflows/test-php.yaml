@@ -8,11 +8,28 @@ on:
         description: '["self-hosted", "some-runner"]'
         required: true
         type: string
+      php-lint:
+        required: false
+        type: boolean
+        default: true
+      php-lint-cmd:
+        description: optional args for php-cs-fixer
+        required: false
+        type: string
+        default: null
+      php-cs-fixer:
+        required: false
+        type: boolean
+        default: false
       php-cs-fixer-cmd:
         description: optional args for php-cs-fixer
         required: false
         type: string
         default: null
+      php-stan:
+        required: false
+        type: boolean
+        default: false
       php-stan-cmd:
         description: path(s) for php stan to check
         required: false
@@ -28,18 +45,23 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3.5.0
 
-      # https://github.com/marketplace/actions/php-lint
+      # https://github.com/marketplace/actions/check-php-syntax-errors
       - name: php-lint
-        uses: michaelw90/PHP-Lint@2.1.0
+        if: ${{ inputs.php-lint }}
+        uses: overtrue/phplint@6.0.0
+        with:
+          options: ${{ inputs.php-lint-cmd }}
 
       # https://github.com/marketplace/actions/oskar-php-cs-fixer
       - name: php-cs-fixer
+        if: ${{ inputs.php-cs-fixer }}
         uses: OskarStark/php-cs-fixer-ga@3.17.0
         with:
           args: ${{ inputs.php-cs-fixer-cmd }}
 
       # https://github.com/marketplace/actions/oskar-phpstan
       - name: php-stan
+        if: ${{ inputs.php-stan }}
         uses: OskarStark/phpstan-ga@1.9.0
         with:
           args: ${{ inputs.php-stan-cmd }}
