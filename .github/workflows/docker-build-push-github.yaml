@@ -22,6 +22,10 @@ on:
         required: false
         type: string
         default: ${{ github.sha }}
+      platforms:
+        description: "define multi-platform images"
+        required: false
+        type: string
       file:
         description: "path to Dockerfile"
         required: false
@@ -92,6 +96,7 @@ jobs:
         uses: docker/build-push-action@v4.0.0
         with:
           push: true
+          platforms: ${{ inputs.platforms }}
           file: ${{ inputs.file }}
           context: ${{ inputs.context }}
           tags: ${{ steps.meta.outputs.tags }}
