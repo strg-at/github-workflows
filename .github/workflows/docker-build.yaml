@@ -8,6 +8,10 @@ on:
         description: '["self-hosted", "some-runner"]'
         required: true
         type: string
+      platforms:
+        description: "define multi-platform images"
+        required: false
+        type: string
       file:
         description: "path to Dockerfile"
         required: false
@@ -48,8 +52,6 @@ jobs:
       # https://github.com/marketplace/actions/docker-setup-buildx
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v2.5.0
-        with:
-          driver: docker
 
       # https://github.com/marketplace/actions/github-app-token
       - name: generate token
@@ -69,6 +71,7 @@ jobs:
         uses: docker/build-push-action@v4.0.0
         with:
           push: false
+          platforms: ${{ inputs.platforms }}
           file: ${{ inputs.file }}
           context: ${{ inputs.context }}
           tags: ${{ github.sha }}
