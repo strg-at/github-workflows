@@ -55,11 +55,6 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
-      - name: list the state of node modules
-        if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
-        continue-on-error: true
-        run: npm list
-
       - name: install
         run: npm ci
 
