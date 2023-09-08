@@ -1,0 +1,91 @@
+---
+name: check if docker image exists in google
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: '["self-hosted", "some-runner"]'
+        required: true
+        type: string
+      workload-identity-provider:
+        description: "projects/<number>/locations/global/..."
+        required: true
+        type: string
+      service-account:
+        description: "github-artifactregistry@..."
+        required: true
+        type: string
+      registry:
+        description: "registry url"
+        required: false
+        type: string
+        default: "ghcr.io"
+      gcp:
+        description: "google cloud project id"
+        required: true
+        type: string
+      repository:
+        description: "repository"
+        required: true
+        type: string
+      subpath:
+        description: "subpath to image name, f.e. integration/app-name"
+        required: true
+        type: string
+      tag:
+        description: "tag for image - default sha"
+        required: false
+        type: string
+        default: ${{ github.sha }}
+
+    secrets:
+      github-app-id:
+        description: "github app id"
+        required: false
+      github-app-key:
+        description: "github app private key"
+        required: false
+
+    outputs:
+      tag:
+        description: "found || not found"
+        value: ${{ jobs.check-image-exists.outputs.tag }}
+
+jobs:
+  check-image-exists:
+    name: github
+    runs-on: ${{fromJSON(inputs.runner)}}
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      image-path: ${{ inputs.registry }}/${{ inputs.gcp }}/${{ inputs.repository }}/${{ inputs.subpath }}
+    outputs:
+      tag: ${{ steps.inspect.outputs.tag }}
+
+    steps:
+      # https://github.com/marketplace/actions/authenticate-to-google-cloud
+      - name: authenticate to google cloud
+        id: auth
+        uses: "google-github-actions/auth@v1.0.0"
+        with:
+          token_format: "access_token"
+          workload_identity_provider: ${{ inputs.workload-identity-provider }}
+          service_account: ${{ inputs.service-account }}
+
+      # https://github.com/marketplace/actions/docker-login
+      - name: log into registry
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ inputs.registry }}
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      # https://github.com/marketplace/actions/docker-image-tag-exists
+      - name: inspect
+        id: inspect
+        uses: tyriis/docker-image-tag-exists@v1.0.0
+        with:
+          image: ${{ env.image-path }}
+          tag: ${{ inputs.tag }}
