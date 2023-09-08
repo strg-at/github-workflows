@@ -1,0 +1,58 @@
+---
+name: check if docker image exists in github
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: '["self-hosted", "some-runner"]'
+        required: true
+        type: string
+      registry:
+        description: "registry url"
+        required: false
+        type: string
+        default: "ghcr.io"
+      subpath:
+        description: "subpath to image name, f.e. integration/app-name"
+        required: true
+        type: string
+      tags:
+        description: "tags for image - default sha"
+        required: false
+        type: string
+        default: ${{ github.sha }}
+
+    outputs:
+      tag:
+        description: "found || not found"
+        value: ${{ jobs.check-image-exists.outputs.tag }}
+
+jobs:
+  check-image-exists:
+    name: github
+    runs-on: ${{fromJSON(inputs.runner)}}
+    permissions:
+      contents: read
+      packages: read
+    env:
+      image-path: ${{ inputs.registry }}/${{ github.repository }}/${{ inputs.subpath }}
+    outputs:
+      tag: ${{ steps.inspect.outputs.tag }}
+
+    steps:
+      # https://github.com/marketplace/actions/docker-login
+      - name: log into registry
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ inputs.registry }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # https://github.com/marketplace/actions/docker-image-tag-exists
+      - name: inspect
+        id: inspect
+        uses: tyriis/docker-image-tag-exists@v1.0.0
+        with:
+          image: ${{ env.image-path }}
+          tag: ${{ inputs.tags }}
