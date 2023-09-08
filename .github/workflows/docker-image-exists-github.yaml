@@ -17,8 +17,8 @@ on:
         description: "subpath to image name, f.e. integration/app-name"
         required: true
         type: string
-      tags:
-        description: "tags for image - default sha"
+      tag:
+        description: "tag for image - default sha"
         required: false
         type: string
         default: ${{ github.sha }}
@@ -55,4 +55,4 @@ jobs:
         uses: tyriis/docker-image-tag-exists@v1.0.0
         with:
           image: ${{ env.image-path }}
-          tag: ${{ inputs.tags }}
+          tag: ${{ inputs.tag }}
