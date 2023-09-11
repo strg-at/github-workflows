@@ -39,14 +39,6 @@ on:
         type: string
         default: ${{ github.sha }}
 
-    secrets:
-      github-app-id:
-        description: "github app id"
-        required: false
-      github-app-key:
-        description: "github app private key"
-        required: false
-
     outputs:
       tag:
         description: "found || not found"
@@ -54,7 +46,7 @@ on:
 
 jobs:
   check-image-exists:
-    name: github
+    name: google
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
@@ -85,7 +77,9 @@ jobs:
       # https://github.com/marketplace/actions/docker-image-tag-exists
       - name: inspect
         id: inspect
-        uses: tyriis/docker-image-tag-exists@v1.1.0
+        uses: tyriis/docker-image-tag-exists@v1.1.1
+        env:
+          NODE_LOG_LEVEL: debug
         with:
           image: ${{ env.image-path }}
           tag: ${{ inputs.tag }}
