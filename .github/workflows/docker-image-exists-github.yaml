@@ -52,7 +52,8 @@ jobs:
       # https://github.com/marketplace/actions/docker-image-tag-exists
       - name: inspect
         id: inspect
-        uses: tyriis/docker-image-tag-exists@v1.1.0
+        uses: tyriis/docker-image-tag-exists@v2.0.1
         with:
-          image: ${{ env.image-path }}
+          registry: ${{ inputs.registry }}
+          repository: ${{ github.repository }}/${{ inputs.subpath }}
           tag: ${{ inputs.tag }}
