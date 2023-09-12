@@ -61,16 +61,15 @@ jobs:
           workload_identity_provider: ${{ inputs.workload-identity-provider }}
           service_account: ${{ inputs.service-account }}
 
-      # https://github.com/marketplace/actions/docker-login
-      - name: log into registry
-        uses: docker/login-action@v2.1.0
+      # https://github.com/marketplace/actions/set-up-gcloud-cloud-sdk-environment
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1.1.1
         with:
-          registry: ${{ inputs.registry }}
-          username: oauth2accesstoken
-          password: ${{ steps.auth.outputs.access_token }}
+          # Workload Identity Federation requires version 363.0.0 or newer.
+          version: ">= 363.0.0"
 
       - name: retag image
         run: |
-          docker pull ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }}
-          docker tag ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }} ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
-          docker push ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
+          gcloud container images add-tag \
+            ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }} \
+            ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
