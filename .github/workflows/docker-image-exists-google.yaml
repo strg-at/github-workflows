@@ -18,9 +18,8 @@ on:
         type: string
       registry:
         description: "registry url"
-        required: false
+        required: true
         type: string
-        default: "ghcr.io"
       gcp:
         description: "google cloud project id"
         required: true
@@ -70,20 +69,14 @@ jobs:
           workload_identity_provider: ${{ inputs.workload-identity-provider }}
           service_account: ${{ inputs.service-account }}
 
-      # https://github.com/marketplace/actions/docker-login
-      - name: log into registry
-        uses: docker/login-action@v2.1.0
-        with:
-          registry: ${{ inputs.registry }}
-          username: oauth2accesstoken
-          password: ${{ steps.auth.outputs.access_token }}
-
       # https://github.com/marketplace/actions/docker-image-tag-exists
       - name: inspect
         id: inspect
-        uses: tyriis/docker-image-tag-exists@v1.1.1
+        uses: tyriis/docker-image-tag-exists@v2.0.0
         env:
           NODE_LOG_LEVEL: debug
         with:
-          image: ${{ env.image-path }}
+          registry: ${{ inputs.registry }}
+          repository: ${{ inputs.gcp }}/${{ inputs.repository }}/${{ inputs.subpath }}
           tag: ${{ inputs.tag }}
+          token: ${{ steps.auth.outputs.access_token }}
