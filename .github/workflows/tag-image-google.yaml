@@ -66,9 +66,10 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1.1.1
         with:
           # Workload Identity Federation requires version 363.0.0 or newer.
-          version: '>= 363.0.0'
+          version: ">= 363.0.0"
 
       - name: retag image
         run: |
-          gcloud container images add-tag ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }} \
-          ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
+          gcloud container images add-tag \
+            ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }} \
+            ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
