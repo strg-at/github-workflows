@@ -147,6 +147,7 @@ jobs:
           context: ${{ inputs.context }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: 'false'
           secrets: |
             "gh-read-token=${{ steps.generate-token.outputs.token }}"
 
