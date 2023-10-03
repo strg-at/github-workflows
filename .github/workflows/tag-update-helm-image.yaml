@@ -31,6 +31,10 @@ on:
         required: false
         type: string
         default: "chore: update to"
+      committer:
+        description: "Display Name <email@address.com>"
+        required: false
+        type: string
     secrets:
       github-app-id:
         description: "github app id"
@@ -86,7 +90,7 @@ jobs:
             --field branch="${{ inputs.destination-branch }}" \
             --field sha="$SHA"
 
-      # https://github.com/marketplace/actions/pull-request-action
+      # https://github.com/marketplace/actions/create-pull-request
       - name: create pr
         uses: peter-evans/create-pull-request@v5.0.0
         if: ${{ inputs.create-pr }}
@@ -94,7 +98,7 @@ jobs:
           token: ${{ steps.generate-token.outputs.token }}
           add-paths: ${{ inputs.file-path }}
           commit-message: ${{ inputs.commit-message }}
-          committer: ${{ github.actor }}
-          author: ${{ github.actor }}
+          committer: ${{ inputs.committer }}
+          author: ${{ inputs.committer }}
           branch: release/${{ inputs.tag }}
           base: ${{ inputs.destination-branch }}
