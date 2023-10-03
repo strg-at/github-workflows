@@ -25,7 +25,7 @@ on:
         description: "release/tag"
         required: false
         type: string
-        default: "release/${{ inputs.tag }}"
+        default: "release/update-helm-image"
       destination-branch:
         description: "main"
         required: false
@@ -35,7 +35,7 @@ on:
         description: "release: tag"
         required: false
         type: string
-        default: "release: ${{ inputs.tag }}"
+        default: "automated pr for updating helm image"
       pr-body:
         description: "pr body"
         required: false
@@ -45,7 +45,7 @@ on:
         description: "release: tag"
         required: false
         type: string
-        default: "release: ${{ inputs.tag }}"
+        default: "chore: update"
     secrets:
       github-app-id:
         description: "github app id"
