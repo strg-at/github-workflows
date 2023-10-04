@@ -22,7 +22,7 @@ on:
         type: boolean
         default: true
       branch-name:
-        description: "release/tag"
+        description: "name of branch, f.e. release/tag"
         required: false
         type: string
         default: "release/update-helm-image"
@@ -32,17 +32,17 @@ on:
         type: string
         default: main
       pr-title:
-        description: "release: tag"
+        description: "pr title, f.e. release: tag"
         required: false
         type: string
         default: "automated pr for updating helm image"
       pr-body:
-        description: "pr body"
+        description: "pr body, default empty"
         required: false
         type: string
         default: ""
       commit-message:
-        description: "release: tag"
+        description: "commit message, f.e. release: tag"
         required: false
         type: string
         default: "chore: update"
