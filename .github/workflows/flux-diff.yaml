@@ -1,0 +1,66 @@
+---
+name: flux diff
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: '["self-hosted", "some-runner"]'
+        required: true
+        type: string
+      source:
+        description: "flux gitrepo source"
+        required: true
+        type: string
+
+    secrets:
+      github-app-id:
+        description: "github app id"
+        required: false
+      github-app-key:
+        description: "github app private key"
+        required: false
+
+jobs:
+  flux-diff:
+    runs-on: ${{fromJSON(inputs.runner)}}
+    permissions:
+      pull-requests: write
+    strategy:
+      matrix:
+        path: ["kubernetes"]
+        resource: ["helmrelease", "kustomization"]
+    steps:
+      # https://github.com/marketplace/actions/github-app-token
+      - name: generate token
+        id: generate-token
+        uses: tibdex/github-app-token@v1.8.0
+        env:
+          # https://github.com/tibdex/github-app-token/issues/54
+          # https://stackoverflow.com/questions/72104449/node-js-crypto-fails-to-sign-pem-key-string-from-file-with-error25066067dso-su
+          OPENSSL_CONF: /dev/null
+        with:
+          app_id: ${{ secrets.github-app-id }}
+          private_key: ${{ secrets.github-app-key }}
+
+      # https://github.com/allenporter/flux-local/tree/main/action/diff
+      - name: diff resources
+        uses: allenporter/flux-local/action/diff@efbe055c6dc2a63d1102db582632d2aa03696664 # 3.1.1
+        id: diff
+        with:
+          sources: ${{ inputs.source }}
+          path: "${{ matrix.path }}"
+          resource: "${{ matrix.resource }}"
+
+      # https://github.com/marketplace/actions/add-pr-comment
+      - name: add comment
+        if: ${{ steps.diff.outputs.diff != '' }}
+        uses: mshick/add-pr-comment@7c0890544fb33b0bdd2e59467fbacb62e028a096 # v2.8.1
+        with:
+          repo-token: "${{ steps.generate-token.outputs.token }}"
+          message-id: "${{ github.event.pull_request.number }}/${{ matrix.path }}/${{ matrix.resource }}"
+          message-failure: diff was not successful
+          message: |
+            ```diff
+            ${{ steps.diff.outputs.diff }}
+            ```
