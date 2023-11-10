@@ -12,6 +12,11 @@ on:
         description: "flux gitrepo source"
         required: true
         type: string
+      path:
+        description: "path to flux resources"
+        required: false
+        type: string
+        default: '["kubernetes"]'
 
     secrets:
       github-app-id:
@@ -28,7 +33,7 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        path: ["kubernetes"]
+        path: ${{fromJSON(inputs.path)}}
         resource: ["helmrelease", "kustomization"]
     steps:
       # https://github.com/marketplace/actions/github-app-token
