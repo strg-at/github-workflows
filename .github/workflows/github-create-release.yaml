@@ -1,0 +1,52 @@
+name: create release in github
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: '["self-hosted", "some-runner"]'
+        required: true
+        type: string
+      files:
+        description: "newline-delimited globs of paths to assets to upload for release"
+        required: false
+        type: string
+
+    secrets:
+      github-app-id:
+        description: "github app id"
+        required: false
+      github-app-key:
+        description: "github app private key"
+        required: false
+
+jobs:
+  create-release:
+    name: release
+    runs-on: ${{fromJSON(inputs.runner)}}
+    permissions:
+      contents: write
+
+    steps:
+      # https://github.com/marketplace/actions/checkout
+      - name: checkout repository
+        uses: actions/checkout@v4.1.1
+
+      # https://github.com/marketplace/actions/github-app-token
+      - name: generate token
+        id: generate-token
+        uses: tibdex/github-app-token@v2.1.0
+        # env:
+        #   # https://github.com/tibdex/github-app-token/issues/54
+        #   # https://stackoverflow.com/questions/72104449/node-js-crypto-fails-to-sign-pem-key-string-from-file-with-error25066067dso-su
+        #   OPENSSL_CONF: /dev/null
+        with:
+          app_id: ${{ secrets.github-app-id }}
+          private_key: ${{ secrets.github-app-key }}
+
+      # https://github.com/marketplace/actions/gh-release
+      - name: create release
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          files: ${{ inputs.files }}
