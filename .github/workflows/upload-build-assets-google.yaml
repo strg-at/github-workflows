@@ -45,6 +45,11 @@
           description: "name of google storage bucket"
           required: true
           type: string
+        process-gcloudignore:
+          description: "process .gcloudignore file"
+          required: false
+          type: boolean
+          default: false
 
   jobs:
     upload-build-assets:
@@ -91,3 +96,4 @@
           with:
             path: ${{ inputs.subpath }}-${{ inputs.tag }}.tar.gz
             destination: ${{ inputs.bucket-name }}/${{ inputs.subpath }}
+            process_gcloudignore: ${{ inputs.process-gcloudignore }}
