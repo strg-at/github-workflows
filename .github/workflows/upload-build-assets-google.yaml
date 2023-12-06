@@ -70,6 +70,14 @@
             workload_identity_provider: ${{ inputs.workload-identity-provider }}
             service_account: ${{ inputs.service-account }}
 
+        # https://github.com/marketplace/actions/docker-login
+        - name: log into registry
+          uses: docker/login-action@v2.1.0
+          with:
+            registry: ${{ inputs.registry }}
+            username: oauth2accesstoken
+            password: ${{ steps.auth.outputs.access_token }}
+
         - name: extract and archive build assets
           run: |
             docker pull ${{ env.image-path }}:${{ inputs.tag }}
