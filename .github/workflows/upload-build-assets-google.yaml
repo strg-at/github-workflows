@@ -1,0 +1,99 @@
+---
+  name: upload build assets to google storage
+
+  on:
+    workflow_call:
+      inputs:
+        runner:
+          description: '["self-hosted", "some-runner"]'
+          required: true
+          type: string
+        workload-identity-provider:
+          description: "projects/<number>/locations/global/..."
+          required: true
+          type: string
+        service-account:
+          description: "github-artifactregistry@..."
+          required: true
+          type: string
+        registry:
+          description: "registry url"
+          required: true
+          type: string
+        gcp:
+          description: "google cloud project id"
+          required: true
+          type: string
+        repository:
+          description: "repository"
+          required: true
+          type: string
+        subpath:
+          description: "subpath to image name, f.e. app-name"
+          required: true
+          type: string
+        tag:
+          description: "tag for image - default sha"
+          required: false
+          type: string
+          default: ${{ github.sha }}
+        container-path:
+          description: "path to build assets in docker image, usually /app"
+          required: true
+          type: string
+        bucket-name:
+          description: "name of google storage bucket"
+          required: true
+          type: string
+        process-gcloudignore:
+          description: "process .gcloudignore file"
+          required: false
+          type: boolean
+          default: false
+
+  jobs:
+    upload-build-assets:
+      name: google
+      runs-on: ${{fromJSON(inputs.runner)}}
+      permissions:
+        contents: read
+        id-token: write
+      env:
+        image-path: ${{ inputs.registry }}/${{ inputs.gcp }}/${{ inputs.repository }}/${{ inputs.subpath }}
+
+      steps:
+        # https://github.com/marketplace/actions/checkout
+        - name: checkout repository
+          uses: actions/checkout@v4.1.1
+
+        # https://github.com/marketplace/actions/authenticate-to-google-cloud
+        - name: authenticate to google cloud
+          id: auth
+          uses: google-github-actions/auth@v1.0.0
+          with:
+            token_format: "access_token"
+            workload_identity_provider: ${{ inputs.workload-identity-provider }}
+            service_account: ${{ inputs.service-account }}
+
+        # https://github.com/marketplace/actions/docker-login
+        - name: log into registry
+          uses: docker/login-action@v2.1.0
+          with:
+            registry: ${{ inputs.registry }}
+            username: oauth2accesstoken
+            password: ${{ steps.auth.outputs.access_token }}
+
+        - name: extract and archive build assets
+          run: |
+            docker pull ${{ env.image-path }}:${{ inputs.tag }}
+            CONTAINER_ID=$(docker create ${{ env.image-path }}:${{ inputs.tag }})
+            docker cp ${CONTAINER_ID}:${{ inputs.container-path }} .
+            tar -czvf ${{ inputs.subpath }}-${{ inputs.tag }}.tar.gz .${{ inputs.container-path }}
+
+        # https://github.com/marketplace/actions/cloud-storage-uploader
+        - name: upload to cloud storage
+          uses: google-github-actions/upload-cloud-storage@v1.0.3
+          with:
+            path: ${{ inputs.subpath }}-${{ inputs.tag }}.tar.gz
+            destination: ${{ inputs.bucket-name }}/${{ inputs.subpath }}
+            process_gcloudignore: ${{ inputs.process-gcloudignore }}
