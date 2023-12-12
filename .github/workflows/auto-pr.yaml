@@ -1,0 +1,48 @@
+---
+  name: auto pr
+  on:
+    workflow_call:
+      inputs:
+        runner:
+          description: '["self-hosted", "some-runner"]'
+          required: true
+          type: string
+        branch:
+          description: "branch to create pull request for"
+          required: true
+          type: string
+          default: "main"
+        update:
+          description: "update pull request if it exists"
+          required: true
+          type: string
+          default: "true"
+        pr-title:
+          description: "pr title"
+          required: false
+          type: string
+        pr-body:
+          description: "pr body"
+          required: false
+          type: string
+
+  jobs:
+    create-pr:
+      runs-on: ${{fromJSON(inputs.runner)}}
+      permissions:
+        contents: write
+        pull-requests: write
+      steps:
+        # https://github.com/marketplace/actions/checkout
+        - name: checkout repository
+          uses: actions/checkout@v4.1.1
+
+        # https://github.com/marketplace/actions/pull-request-action
+        - name: create pr
+          uses: vsoch/pull-request-action@1.1.0
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            PULL_REQUEST_BRANCH: ${{ inputs.branch }}
+            PULL_REQUEST_UPDATE: ${{ inputs.update }}
+            PULL_REQUEST_TITLE: ${{ inputs.pr-title }}
+            PULL_REQUEST_BODY: ${{ inputs.pr-body }}
