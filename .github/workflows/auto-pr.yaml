@@ -8,15 +8,23 @@
           required: true
           type: string
         branch:
-          description: 'branch to create pull request for'
+          description: "branch to create pull request for"
           required: true
           type: string
           default: "main"
         update:
-          description: 'update pull request if it exists'
+          description: "update pull request if it exists"
           required: true
           type: string
           default: "true"
+        pr-title:
+          description: "pr title"
+          required: false
+          type: string
+        pr-body:
+          description: "pr body"
+          required: false
+          type: string
 
   jobs:
     create-pr:
@@ -36,3 +44,5 @@
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             PULL_REQUEST_BRANCH: ${{ inputs.branch }}
             PULL_REQUEST_UPDATE: ${{ inputs.update }}
+            PULL_REQUEST_TITLE: ${{ inputs.pr-title }}
+            PULL_REQUEST_BODY: ${{ inputs.pr-body }}
