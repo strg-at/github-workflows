@@ -1,0 +1,129 @@
+---
+name: update value in yaml
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: '["self-hosted", "some-runner"]'
+        required: true
+        type: string
+      value:
+        description: "value to be updated, f.e. tag"
+        required: true
+        type: string
+      value-path:
+        description: "path to value, f.e. .spec.values.image.tag"
+        required: false
+        type: string
+        default: ".spec.values.image.tag"
+      file-path:
+        description: "path to file, f.e. tag-update/testfile.yaml"
+        required: true
+        type: string
+      create-pr:
+        description: "create pr, boolean"
+        required: false
+        type: boolean
+        default: true
+      commit-branch:
+        description: "branch where commit will be pushed to,  f.e. release/2010.01.01 or main"
+        required: false
+        type: string
+        default: "main"
+      target-branch:
+        description: "target-branch if pr, f.e. main"
+        required: false
+        type: string
+      pr-title:
+        description: "pr-title, f.e. release: tag"
+        required: false
+        type: string
+        default: "chore: update"
+      pr-body:
+        description: "pr-body, default empty"
+        required: false
+        type: string
+        default: ""
+      commit-message:
+        description: "commit-message, f.e. release: tag"
+        required: false
+        type: string
+        default: "chore: update"
+    secrets:
+      github-app-id:
+        description: "github app id"
+        required: true
+      github-app-key:
+        description: "github app private key"
+        required: true
+
+jobs:
+  value-update:
+    name: yaml
+    runs-on: ${{fromJSON(inputs.runner)}}
+    permissions:
+      contents: write
+    steps:
+      # https://github.com/marketplace/actions/checkout
+      - name: checkout repository
+        uses: actions/checkout@v4.1.1
+
+      # https://github.com/marketplace/actions/setup-yq
+      - name: update value
+        uses: mikefarah/yq@v4.35.2
+        with:
+          cmd: yq -i '${{ inputs.value-path }} = "${{ inputs.value }}"' ${{ inputs.file-path }}
+
+      # https://github.com/marketplace/actions/github-app-token
+      - name: generate token
+        id: generate-token
+        uses: tibdex/github-app-token@v2.1.0
+        env:
+          # https://github.com/tibdex/github-app-token/issues/54
+          # https://stackoverflow.com/questions/72104449/node-js-crypto-fails-to-sign-pem-key-string-from-file-with-error25066067dso-su
+          OPENSSL_CONF: /dev/null
+        with:
+          app_id: ${{ secrets.github-app-id }}
+          private_key: ${{ secrets.github-app-key }}
+
+      - name: branch exists
+        if: ${{ inputs.create-pr }}
+        id: branch-exists
+        run: |
+          if [[ -n $(git ls-remote --heads origin ${{ inputs.commit-branch }}) ]]; then
+            echo "branch_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "branch_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # https://github.com/marketplace/actions/create-branch
+      - name: create branch
+        if: ${{ inputs.create-pr && steps.branch-exists.outputs.branch_exists == 'false' }}
+        uses: peterjgrainger/action-create-branch@v2.4.0
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+        with:
+          branch: refs/heads/${{ inputs.commit-branch }}
+          sha: ${{ github.sha }}
+
+      # https://github.com/marketplace/actions/multi-file-commit
+      - name: multi-file-commit
+        id: multi-file-commit
+        uses: tyriis/multi-file-commit@v0.3.11
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          ref: ${{ inputs.commit-branch }}
+          message: ${{ inputs.commit-message }}
+
+      # https://github.com/marketplace/actions/pull-request-action
+      - name: create pr
+        if: ${{ inputs.create-pr }}
+        uses: vsoch/pull-request-action@1.1.0
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          PULL_REQUEST_BRANCH: ${{ inputs.target-branch }}
+          PULL_REQUEST_FROM_BRANCH: ${{ inputs.commit-branch }}
+          PULL_REQUEST_TITLE: ${{ inputs.pr-title }}
+          PULL_REQUEST_BODY: ${{ inputs.pr-body }}
+          PULL_REQUEST_UPDATE: "true"
