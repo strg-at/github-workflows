@@ -45,7 +45,7 @@ jobs:
           private_key: ${{ secrets.github-app-key }}
 
       # https://github.com/fluxcd/flux2/tree/v2.2.2/action
-      - name: Setup Flux CLI
+      - name: setup flux cli
         uses: fluxcd/flux2/action@v2.2.2
 
       # https://github.com/allenporter/flux-local/tree/main/action/diff
