@@ -48,6 +48,11 @@ jobs:
       - name: setup flux cli
         uses: fluxcd/flux2/action@v2.2.2
 
+      # https://github.com/marketplace/actions/setup-kustomize
+      - name: setup kustomize
+        uses: imranismail/setup-kustomize@v2.0.0
+
+
       # https://github.com/allenporter/flux-local/tree/main/action/diff
       - name: diff resources
         uses: allenporter/flux-local/action/diff@d290eeb73abc46bd130aa32f4affd78d40806433 # 4.3.0
