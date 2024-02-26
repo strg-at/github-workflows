@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       runner:
-        description: '["self-hosted", "some-runner"]'
+        description: '["some-runners"]'
         required: true
         type: string
       workload-identity-provider:
@@ -16,24 +16,12 @@ on:
         description: "github-artifactregistry@..."
         required: true
         type: string
-      registry:
-        description: "registry url"
-        required: true
-        type: string
-      gcp:
-        description: "google cloud project id"
-        required: true
-        type: string
-      repository:
-        description: "repository"
-        required: true
-        type: string
       source-path:
-        description: "path to source image"
+        description: "full source path with :tag"
         required: true
         type: string
       target-path:
-        description: "path to target image"
+        description: "full target path with :tag"
         required: true
         type: string
 
@@ -44,18 +32,16 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    env:
-      base-path: ${{ inputs.registry }}/${{ inputs.gcp }}/${{ inputs.repository }}
 
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
-        uses: actions/checkout@v3.5.0
+        uses: actions/checkout@v4.1.1
 
       # https://github.com/marketplace/actions/authenticate-to-google-cloud
       - name: authenticate to google cloud
         id: auth
-        uses: "google-github-actions/auth@v1.0.0"
+        uses: "google-github-actions/auth@v2.1.2"
         with:
           token_format: "access_token"
           workload_identity_provider: ${{ inputs.workload-identity-provider }}
@@ -63,13 +49,10 @@ jobs:
 
       # https://github.com/marketplace/actions/set-up-gcloud-cloud-sdk-environment
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1.1.1
-        with:
-          # Workload Identity Federation requires version 363.0.0 or newer.
-          version: ">= 363.0.0"
+        uses: google-github-actions/setup-gcloud@v2.1.0
 
       - name: retag image
         run: |
           gcloud container images add-tag \
-            ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }} \
-            ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
+            ${{ inputs.source-path }} \
+            ${{ inputs.target-path }}
