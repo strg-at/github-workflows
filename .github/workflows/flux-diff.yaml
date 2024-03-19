@@ -62,6 +62,7 @@ jobs:
       - name: install kube-tools
         uses: alexellis/arkade-get@ea6458824534763a1bd42341ed3c5297f0c5b55a
         with:
+          print-summary: false
           flux: v2.2.3
           helm: v3.14.3
           kustomize: v5.3.0
