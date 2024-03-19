@@ -19,11 +19,11 @@ on:
         type: string
         default: '["helmrelease", "kustomization"]'
       sources:
-        description: "define which source repos to include (f.e. oci-devenv=./oci)"
+        description: "define which source repos to include (f.e. flux-devenv=./oci)"
         required: false
         type: string
-      oci-registry:
-        description: "define subpath of oci registry for devenv (f.e. oci-devenv)"
+      oci-repository:
+        description: "define oci-repository of devenv (f.e. flux-devenv)"
         required: false
         type: string
 
@@ -68,14 +68,14 @@ jobs:
 
       # https://github.com/marketplace/actions/docker-setup-buildx
       - name: setup docker
-        if: ${{ inputs.oci-registry }}
+        if: ${{ inputs.oci-repository }}
         uses: docker/setup-buildx-action@v3.2.0
 
       - name: run docker and push artifact
-        if: ${{ inputs.oci-registry }}
+        if: ${{ inputs.oci-repository }}
         run: |
           docker run -d --rm --name kind-registry -p 5050:5000 registry:2.8.1
-          flux push artifact oci://localhost:5050/${{ inputs.oci-registry }}:local \
+          flux push artifact oci://localhost:5050/${{ inputs.oci-repository }}:local \
             --path="oci" \
             --source="local" \
             --revision="latest"
