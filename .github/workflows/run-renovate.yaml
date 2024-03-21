@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       runner:
-        description: '["self-hosted", "some-runner"]'
+        description: '["some-runners"]'
         required: true
         type: string
       dry-run:
@@ -23,6 +23,14 @@ on:
         required: false
         type: string
         default: ".github/renovate.json5"
+      workload-identity-provider:
+        description: "projects/<number>/locations/global/..."
+        required: false
+        type: string
+      service-account:
+        description: "github-artifactregistry@..."
+        required: false
+        type: string
     secrets:
       github-app-id:
         description: "github app id"
@@ -34,28 +42,37 @@ on:
 jobs:
   renovate:
     runs-on: ${{fromJSON(inputs.runner)}}
+    permissions:
+      contents: read
+      id-token: write
     steps:
       # https://github.com/marketplace/actions/github-app-token
       - name: generate token
         id: generate-token
-        uses: tibdex/github-app-token@v1.8.0
-        env:
-          # https://github.com/tibdex/github-app-token/issues/54
-          # https://stackoverflow.com/questions/72104449/node-js-crypto-fails-to-sign-pem-key-string-from-file-with-error25066067dso-su
-          OPENSSL_CONF: /dev/null
+        uses: tibdex/github-app-token@v2.1.0
         with:
           app_id: ${{ secrets.github-app-id }}
           private_key: ${{ secrets.github-app-key }}
 
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
-        uses: actions/checkout@v3.5.0
+        uses: actions/checkout@v4.1.2
         with:
           token: ${{ steps.generate-token.outputs.token }}
 
+      # https://github.com/marketplace/actions/authenticate-to-google-cloud
+      - name: authenticate to google cloud
+        id: auth
+        if: ${{ inputs.workload-identity-provider && inputs.service-account }}
+        uses: "google-github-actions/auth@v2.1.2"
+        with:
+          token_format: "access_token"
+          workload_identity_provider: ${{ inputs.workload-identity-provider }}
+          service_account: ${{ inputs.service-account }}
+
       # https://github.com/marketplace/actions/renovate-bot-github-action
       - name: renovate bot
-        uses: renovatebot/github-action@v39.1.2
+        uses: renovatebot/github-action@v40.1.5
         env:
           DRY_RUN: ${{ inputs.dry-run }}
           LOG_LEVEL: ${{ inputs.log-level }}
