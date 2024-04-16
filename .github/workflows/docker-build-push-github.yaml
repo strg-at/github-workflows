@@ -94,6 +94,7 @@ jobs:
           context: ${{ inputs.context }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
 
       # https://github.com/sigstore/cosign
       - name: sign the published docker image
