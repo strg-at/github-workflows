@@ -22,8 +22,16 @@ on:
         description: "define which source repos to include (f.e. flux-devenv=./oci)"
         required: false
         type: string
-      oci-repository:
-        description: "define oci-repository of devenv (f.e. flux-devenv)"
+      flux-cluster-repo-owner:
+        description: "define the owner of the flux-cluster repo (f.e. strg-at)"
+        required: false
+        type: string
+      flux-cluster-repo:
+        description: "define the flux-cluster repo (f.e. flux-cluster)"
+        required: false
+        type: string
+      devenv-repo:
+        description: "define oci-repo of devenv (f.e. flux-devenv)"
         required: false
         type: string
 
@@ -47,55 +55,96 @@ jobs:
         resources: ${{fromJSON(inputs.resources)}}
       fail-fast: false
     steps:
-      # https://github.com/marketplace/actions/checkout
-      - name: Checkout
-        uses: actions/checkout@v4.1.2
-
-      # https://github.com/marketplace/actions/github-app-token
+      # https://github.com/marketplace/actions/create-github-app-token
       - name: generate token
         id: generate-token
-        uses: tibdex/github-app-token@v2.1.0
+        uses: actions/create-github-app-token@7bfa3a4717ef143a604ee0a99d859b8886a96d00 # v1.9.3
         with:
-          app_id: ${{ secrets.github-app-id }}
-          private_key: ${{ secrets.github-app-key }}
+          app-id: ${{ secrets.github-app-id }}
+          private-key: ${{ secrets.github-app-key }}
 
-      # https://github.com/alexellis/arkade-get
-      - name: install kube-tools
-        uses: alexellis/arkade-get@ea6458824534763a1bd42341ed3c5297f0c5b55a
+      # https://github.com/marketplace/actions/checkout
+      - name: checkout
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
         with:
-          print-summary: false
-          flux: v2.2.3
-          helm: v3.14.3
-          kustomize: v5.3.0
+          token: ${{ steps.generate-token.outputs.token }}
+          path: pull
+
+      # https://github.com/marketplace/actions/checkout
+      - name: checkout flux-cluster
+        if: ${{ inputs.devenv-repo }}
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          repository: ${{ inputs.flux-cluster-repo-owner }}/${{ inputs.flux-cluster-repo }}
+          path: pull/oci/${{ inputs.flux-cluster-repo }}
+
+      # https://github.com/marketplace/actions/checkout
+      - name: checkout default branch
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          ref: ${{ github.event.repository.default_branch }}
+          path: default
+
+      # https://github.com/marketplace/actions/checkout
+      - name: checkout flux-cluster default branch
+        if: ${{ inputs.devenv-repo }}
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          repository: ${{ inputs.flux-cluster-repo-owner }}/${{ inputs.flux-cluster-repo }}
+          path: default/oci/${{ inputs.flux-cluster-repo }}
 
       # https://github.com/marketplace/actions/docker-setup-buildx
       - name: setup docker
-        if: ${{ inputs.oci-repository }}
+        if: ${{ inputs.devenv-repo }}
         uses: docker/setup-buildx-action@v3.2.0
 
       - name: run docker and push artifact
-        if: ${{ inputs.oci-repository }}
+        if: ${{ inputs.devenv-repo }}
         run: |
           docker run -d --rm --name kind-registry -p 5050:5000 registry:2.8.1
-          flux push artifact oci://localhost:5050/${{ inputs.oci-repository }}:local \
+          flux push artifact oci://localhost:5050/${{ inputs.devenv-repo }}:local \
             --path="oci" \
             --source="local" \
             --revision="latest"
 
-      # https://github.com/allenporter/flux-local/tree/main/action/diff
+      # https://github.com/allenporter/flux-local
       - name: diff resources
-        uses: allenporter/flux-local/action/diff@4.3.1
-        id: diff
+        uses: docker://ghcr.io/allenporter/flux-local:v5.1.0@sha256:0e956a1b4b7c7da8e9a9451c85db66f3613dcadd6dcf6b0813d7b459d51514f4
         with:
-          token: ${{ steps.generate-token.outputs.token }}
-          path: ${{ matrix.paths }}
-          resource: ${{ matrix.resources }}
-          sources: ${{ inputs.sources }}
+          args: >-
+            diff ${{ matrix.resources }}
+            --unified 6
+            --path /github/workspace/pull/${{ matrix.paths }}/flux
+            --path-orig /github/workspace/default/${{ matrix.paths }}/flux
+            --strip-attrs "helm.sh/chart,checksum/config,app.kubernetes.io/version,chart"
+            --limit-bytes 10000
+            --all-namespaces
+            --sources ${{ inputs.sources }}
+            --output-file diff.patch
+
+      - name: generate diff
+        id: diff
+        run: |
+          cat diff.patch;
+          {
+            echo 'diff<<EOF'
+            cat diff.patch
+            echo EOF
+          } >> "$GITHUB_OUTPUT";
+          {
+            echo "### Diff"
+            echo '```diff'
+            cat diff.patch
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # https://github.com/marketplace/actions/add-pr-comment
       - name: add comment
         if: ${{ steps.diff.outputs.diff }}
-        uses: mshick/add-pr-comment@v2.8.2
+        uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2.8.2
         with:
           repo-token: ${{ steps.generate-token.outputs.token }}
           message-id: ${{ github.event.pull_request.number }}/${{ matrix.paths }}/${{ matrix.resources }}
@@ -104,3 +153,13 @@ jobs:
             ```diff
             ${{ steps.diff.outputs.diff }}
             ```
+
+  flux-diff-success:
+    runs-on: ${{fromJSON(inputs.runner)}}
+    needs:
+      - flux-diff
+    if: ${{ always() }}
+    steps:
+      - name: check matrix status
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1
