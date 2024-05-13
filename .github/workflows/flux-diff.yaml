@@ -8,6 +8,10 @@ on:
         description: '["some-runners"]'
         required: true
         type: string
+      sources:
+        description: "define which source repos to include (f.e. flux-devenv=./oci)"
+        required: true
+        type: string
       paths:
         description: "paths to flux resources"
         required: false
@@ -18,10 +22,6 @@ on:
         required: false
         type: string
         default: '["helmrelease", "kustomization"]'
-      sources:
-        description: "define which source repos to include (f.e. flux-devenv=./oci)"
-        required: false
-        type: string
       flux-cluster-repo-owner:
         description: "define the owner of the flux-cluster repo (f.e. strg-at)"
         required: false
@@ -95,6 +95,14 @@ jobs:
           token: ${{ steps.generate-token.outputs.token }}
           repository: ${{ inputs.flux-cluster-repo-owner }}/${{ inputs.flux-cluster-repo }}
           path: default/oci/${{ inputs.flux-cluster-repo }}
+
+      # https://github.com/alexellis/arkade-get
+      - name: install flux
+        if: ${{ inputs.devenv-repo }}
+        uses: alexellis/arkade-get@ea6458824534763a1bd42341ed3c5297f0c5b55a
+        with:
+          print-summary: false
+          flux: latest
 
       # https://github.com/marketplace/actions/docker-setup-buildx
       - name: setup docker
