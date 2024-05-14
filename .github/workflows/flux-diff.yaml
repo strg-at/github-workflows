@@ -10,7 +10,7 @@ on:
         type: string
       sources:
         description: "define which source repos to include (f.e. flux-devenv=./oci)"
-        required: true
+        required: false
         type: string
       paths:
         description: "paths to flux resources"
