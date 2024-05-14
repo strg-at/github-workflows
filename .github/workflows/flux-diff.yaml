@@ -8,11 +8,6 @@ on:
         description: '["some-runners"]'
         required: true
         type: string
-      sources:
-        description: "define which source repos to include (f.e. flux-devenv=./oci)"
-        required: false
-        type: string
-        default: '""'
       paths:
         description: "paths to flux resources"
         required: false
@@ -23,6 +18,11 @@ on:
         required: false
         type: string
         default: '["helmrelease", "kustomization"]'
+      sources:
+        description: "define which source repos to include (f.e. flux-devenv=./oci)"
+        required: false
+        type: string
+        default: '""'
       flux-cluster-repo-owner:
         description: "define the owner of the flux-cluster repo (f.e. strg-at)"
         required: false
