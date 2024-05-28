@@ -31,10 +31,6 @@ on:
         description: "define the flux-cluster repo (f.e. flux-cluster)"
         required: false
         type: string
-      devenv-repo:
-        description: "define oci-repo of devenv (f.e. flux-devenv)"
-        required: false
-        type: string
       devenv-oci-path:
         description: "define path to oci folder (f.e. oci)"
         required: false
@@ -67,6 +63,7 @@ jobs:
         with:
           app-id: ${{ secrets.github-app-id }}
           private-key: ${{ secrets.github-app-key }}
+          owner: ${{ github.repository_owner}}
 
       # https://github.com/marketplace/actions/checkout
       - name: checkout
@@ -85,7 +82,7 @@ jobs:
 
       # https://github.com/marketplace/actions/checkout
       - name: checkout flux-cluster
-        if: ${{ inputs.devenv-repo }}
+        if: ${{ inputs.flux-cluster-repo }}
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
         with:
           token: ${{ steps.generate-token.outputs.token }}
@@ -94,7 +91,7 @@ jobs:
 
       # https://github.com/marketplace/actions/checkout
       - name: checkout flux-cluster default branch
-        if: ${{ inputs.devenv-repo }}
+        if: ${{ inputs.flux-cluster-repo }}
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
         with:
           token: ${{ steps.generate-token.outputs.token }}
@@ -103,7 +100,7 @@ jobs:
 
       # https://github.com/alexellis/arkade-get
       - name: install flux
-        if: ${{ inputs.devenv-repo }}
+        if: ${{ inputs.flux-cluster-repo }}
         uses: alexellis/arkade-get@d543d47741e9217ba62ff0214444add9a35825f3
         with:
           print-summary: false
@@ -111,14 +108,14 @@ jobs:
 
       # https://github.com/marketplace/actions/docker-setup-buildx
       - name: setup docker
-        if: ${{ inputs.devenv-repo }}
+        if: ${{ inputs.flux-cluster-repo }}
         uses: docker/setup-buildx-action@v3.2.0
 
       - name: run docker and push artifact
-        if: ${{ inputs.devenv-repo }}
+        if: ${{ inputs.flux-cluster-repo }}
         run: |
           docker run -d --rm --name kind-registry -p 5050:5000 registry:2.8.1
-          flux push artifact oci://localhost:5050/${{ inputs.devenv-repo }}:local \
+          flux push artifact oci://localhost:5050/${{ github.event.repository.name }}:local \
             --path="pull/${{inputs.devenv-oci-path}}" \
             --source="local" \
             --revision="latest"
@@ -166,13 +163,3 @@ jobs:
             ```diff
             ${{ steps.diff.outputs.diff }}
             ```
-
-  flux-diff-success:
-    runs-on: ${{fromJSON(inputs.runner)}}
-    needs:
-      - flux-diff
-    if: ${{ always() }}
-    steps:
-      - name: check matrix status
-        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
-        run: exit 1
