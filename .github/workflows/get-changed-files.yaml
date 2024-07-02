@@ -1,0 +1,53 @@
+---
+name: get changed files
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: '["some-runners"]'
+        required: true
+        type: string
+      files:
+        description: "include specific files using patterns"
+        required: false
+        type: string
+      matrix:
+        required: false
+        type: boolean
+        default: false
+      dir_names:
+        required: false
+        type: boolean
+        default: false
+
+    outputs:
+      files:
+        description: "all changed files"
+        value: ${{ jobs.get-changed-files.outputs.files }}
+
+jobs:
+  get-changed-files:
+    runs-on: ${{fromJSON(inputs.runner)}}
+    permissions:
+      contents: read
+    outputs:
+      files: ${{ steps.changed-files.outputs.all_changed_files }}
+
+    steps:
+      # https://github.com/marketplace/actions/checkout
+      - name: checkout repository
+        uses: actions/checkout@v4.1.2
+
+      # https://github.com/marketplace/actions/changed-files
+      - name: get all changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44.5.5
+        with:
+          files: ${{ inputs.files }}
+          matrix: ${{ inputs.matrix }}
+          dir_names: ${{ inputs.dir_names }}
+
+      - name: list all changed files
+        run: |
+          echo "${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_STEP_SUMMARY
