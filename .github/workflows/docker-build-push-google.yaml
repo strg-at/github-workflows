@@ -74,6 +74,7 @@ jobs:
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
+      packages: read
       id-token: write
     env:
       image-path: ${{ inputs.registry }}/${{ inputs.gcp }}/${{ inputs.repository }}/${{ inputs.subpath }}
