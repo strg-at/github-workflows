@@ -39,6 +39,7 @@ jobs:
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
+      packages: read
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
