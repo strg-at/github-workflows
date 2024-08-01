@@ -33,17 +33,13 @@ jobs:
   repo-dispatch:
     runs-on: ${{fromJSON(inputs.runner)}}
     steps:
-      # https://github.com/marketplace/actions/github-app-token
+      # https://github.com/marketplace/actions/create-github-app-token
       - name: generate token
         id: generate-token
-        uses: tibdex/github-app-token@v1.8.0
-        env:
-          # https://github.com/tibdex/github-app-token/issues/54
-          # https://stackoverflow.com/questions/72104449/node-js-crypto-fails-to-sign-pem-key-string-from-file-with-error25066067dso-su
-          OPENSSL_CONF: /dev/null
+        uses: actions/create-github-app-token@v1.10.3
         with:
-          app_id: ${{ secrets.github-app-id }}
-          private_key: ${{ secrets.github-app-key }}
+          app-id: ${{ secrets.github-app-id }}
+          private-key: ${{ secrets.github-app-key }}
 
       # send event to remote repo to update helm-release image tag
       # https://github.com/marketplace/actions/repository-dispatch
