@@ -49,14 +49,14 @@ jobs:
       - name: setup docker buildx
         uses: docker/setup-buildx-action@v3.2.0
 
-      # https://github.com/marketplace/actions/github-app-token
+      # https://github.com/marketplace/actions/create-github-app-token
       - name: generate token
         if: ${{ inputs.generate-token }}
         id: generate-token
-        uses: tibdex/github-app-token@v2.1.0
+        uses: actions/create-github-app-token@v1.10.3
         with:
-          app_id: ${{ secrets.github-app-id }}
-          private_key: ${{ secrets.github-app-key }}
+          app-id: ${{ secrets.github-app-id }}
+          private-key: ${{ secrets.github-app-key }}
 
       # https://github.com/marketplace/actions/build-and-push-docker-images
       - name: build docker image
@@ -68,4 +68,5 @@ jobs:
           context: ${{ inputs.context }}
           tags: ${{ github.sha }}
           secrets: |
+            "action-token=${{ secrets.GITHUB_TOKEN }}"
             "gh-read-token=${{ steps.generate-token.outputs.token }}"
