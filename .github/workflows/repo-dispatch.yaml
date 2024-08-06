@@ -40,6 +40,7 @@ jobs:
         with:
           app-id: ${{ secrets.github-app-id }}
           private-key: ${{ secrets.github-app-key }}
+          owner: ${{ github.repository_owner }}
 
       # send event to remote repo to update helm-release image tag
       # https://github.com/marketplace/actions/repository-dispatch
