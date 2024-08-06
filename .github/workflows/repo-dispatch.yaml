@@ -17,6 +17,11 @@ on:
         description: "target repository"
         required: true
         type: string
+      repository-owner:
+        description: "target repository owner"
+        required: false
+        type: string
+        default: ${{ github.repository_owner }}
       dispatch-event:
         description: "event name that is configured in target repo"
         required: true
@@ -40,7 +45,7 @@ jobs:
         with:
           app-id: ${{ secrets.github-app-id }}
           private-key: ${{ secrets.github-app-key }}
-          owner: ${{ github.repository_owner }}
+          owner: ${{ inputs.repository-owner }}
 
       # send event to remote repo to update helm-release image tag
       # https://github.com/marketplace/actions/repository-dispatch
