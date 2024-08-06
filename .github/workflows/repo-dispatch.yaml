@@ -21,6 +21,7 @@ on:
         description: "target repository owner"
         required: false
         type: string
+        default: ${{ github.repository_owner }}
       dispatch-event:
         description: "event name that is configured in target repo"
         required: true
