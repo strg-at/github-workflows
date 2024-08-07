@@ -106,11 +106,6 @@ jobs:
           print-summary: false
           flux: latest
 
-      # https://github.com/marketplace/actions/docker-setup-buildx
-      - name: setup docker
-        if: ${{ inputs.flux-cluster-repo }}
-        uses: docker/setup-buildx-action@v3.2.0
-
       - name: run docker and push artifact
         if: ${{ inputs.flux-cluster-repo }}
         run: |
