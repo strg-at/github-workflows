@@ -57,6 +57,7 @@ jobs:
         with:
           app-id: ${{ secrets.github-app-id }}
           private-key: ${{ secrets.github-app-key }}
+          owner: ${{ github.repository_owner }}
 
       # https://github.com/marketplace/actions/build-and-push-docker-images
       - name: build docker image
