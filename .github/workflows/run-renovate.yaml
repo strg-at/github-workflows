@@ -19,14 +19,15 @@ on:
         type: string
         default: "debug"
       dry-run:
-        description: "dry-run"
+        description: "dry run"
         required: false
         type: string
-        default: "false"
+        default: "null"
       host-rules:
         description: "host rules"
         required: false
         type: string
+        default: ""
       workload-identity-provider:
         description: "projects/<number>/locations/global/..."
         required: false
