@@ -8,21 +8,25 @@ on:
         description: '["some-runners"]'
         required: true
         type: string
-      dry-run:
-        description: "dry-run"
-        required: false
-        type: string
-        default: "false"
-      log-level:
-        description: "log-level"
-        required: false
-        type: string
-        default: "debug"
       configuration-file:
         description: "path to config"
         required: false
         type: string
         default: ".github/renovate.json5"
+      log-level:
+        description: "log-level"
+        required: false
+        type: string
+        default: "debug"
+      dry-run:
+        description: "dry-run"
+        required: false
+        type: string
+        default: "false"
+      host-rules:
+        description: "host rules"
+        required: false
+        type: string
       workload-identity-provider:
         description: "projects/<number>/locations/global/..."
         required: false
@@ -74,8 +78,9 @@ jobs:
       - name: renovate bot
         uses: renovatebot/github-action@v40.2.4
         env:
-          DRY_RUN: ${{ inputs.dry-run }}
           LOG_LEVEL: ${{ inputs.log-level }}
+          RENOVATE_DRY_RUN: ${{ inputs.dry-run }}
+          RENOVATE_HOST_RULES: ${{ inputs.host-rules }}
         with:
           token: ${{ steps.generate-token.outputs.token }}
           configurationFile: ${{ inputs.configuration-file }}
