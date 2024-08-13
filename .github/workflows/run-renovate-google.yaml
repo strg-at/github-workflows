@@ -13,16 +13,28 @@ on:
         required: false
         type: string
         default: ".github/renovate.json5"
+      workload-identity-provider:
+        description: "projects/<number>/locations/global/..."
+        required: true
+        type: string
+      service-account:
+        description: "github-artifactregistry@..."
+        required: true
+        type: string
+      registry:
+        description: "registry"
+        required: true
+        type: string
       log-level:
         description: "log-level"
         required: false
         type: string
         default: "debug"
       dry-run:
-        description: "dry run"
+        description: "dry-run"
         required: false
         type: string
-        default: "null"
+        default: "false"
     secrets:
       github-app-id:
         description: "github app id"
@@ -36,6 +48,7 @@ jobs:
     runs-on: ${{fromJSON(inputs.runner)}}
     permissions:
       contents: read
+      id-token: write
     steps:
       # https://github.com/marketplace/actions/create-github-app-token
       - name: generate token
@@ -51,12 +64,30 @@ jobs:
         with:
           token: ${{ steps.generate-token.outputs.token }}
 
+      # https://github.com/marketplace/actions/authenticate-to-google-cloud
+      - name: authenticate to google cloud
+        id: auth
+        uses: google-github-actions/auth@v2.1.3
+        with:
+          token_format: "access_token"
+          workload_identity_provider: ${{ inputs.workload-identity-provider }}
+          service_account: ${{ inputs.service-account }}
+
       # https://github.com/marketplace/actions/renovate-bot-github-action
       - name: renovate bot
         uses: renovatebot/github-action@v40.2.4
         env:
+          DRY_RUN: ${{ inputs.dry-run }}
           LOG_LEVEL: ${{ inputs.log-level }}
-          RENOVATE_DRY_RUN: ${{ inputs.dry-run }}
+          RENOVATE_HOST_RULES: |
+            [
+              {
+                matchHost: "${{ inputs.registry }}",
+                hostType: "docker",
+                username: "oauth2accesstoken",
+                password: "${{ steps.auth.outputs.access_token }}"
+              }
+            ]
         with:
           token: ${{ steps.generate-token.outputs.token }}
           configurationFile: ${{ inputs.configuration-file }}
