@@ -20,6 +20,16 @@ on:
         description: "registry url"
         required: true
         type: string
+      docker-username:
+        description: "docker username"
+        required: false
+        type: string
+        default: ""
+      docker-token:
+        description: "docker token"
+        required: false
+        type: string
+        default: ""
       gcp:
         description: "google cloud project id"
         required: true
@@ -104,12 +114,20 @@ jobs:
           service_account: ${{ inputs.service-account }}
 
       # https://github.com/marketplace/actions/docker-login
-      - name: log into registry
-        uses: docker/login-action@v3.1.0
+      - name: login to google artifact registry
+        uses: docker/login-action@v3.3.0
         with:
           registry: ${{ inputs.registry }}
           username: oauth2accesstoken
           password: ${{ steps.auth.outputs.access_token }}
+
+      # https://github.com/marketplace/actions/docker-login
+      - name: login to docker
+        if: ${{ inputs.docker-username && inputs.docker-token }}
+        uses: docker/login-action@v3.3.0
+        with:
+          username: ${{ inputs.docker-username }}
+          password: ${{ inputs.docker-token }}
 
       # https://github.com/marketplace/actions/docker-metadata-action
       - name: extract metadata for docker

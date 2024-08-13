@@ -8,6 +8,16 @@ on:
         description: '["some-runners"]'
         required: true
         type: string
+      docker-username:
+        description: "docker username"
+        required: false
+        type: string
+        default: ""
+      docker-token:
+        description: "docker token"
+        required: false
+        type: string
+        default: ""
       configuration-file:
         description: "path to config"
         required: false
@@ -57,6 +67,15 @@ jobs:
         env:
           LOG_LEVEL: ${{ inputs.log-level }}
           RENOVATE_DRY_RUN: ${{ inputs.dry-run }}
+          RENOVATE_HOST_RULES: |
+            [
+              {
+                matchHost: "docker.io",
+                hostType: "docker",
+                username: "${{ inputs.docker-username }}",
+                password: "${{ inputs.docker-token }}",
+              },
+            ]
         with:
           token: ${{ steps.generate-token.outputs.token }}
           configurationFile: ${{ inputs.configuration-file }}

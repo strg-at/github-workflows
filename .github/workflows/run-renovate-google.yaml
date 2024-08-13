@@ -13,6 +13,16 @@ on:
         required: false
         type: string
         default: ".github/renovate.json5"
+      docker-username:
+        description: "docker username"
+        required: false
+        type: string
+        default: ""
+      docker-token:
+        description: "docker token"
+        required: false
+        type: string
+        default: ""
       workload-identity-provider:
         description: "projects/<number>/locations/global/..."
         required: true
@@ -82,11 +92,17 @@ jobs:
           RENOVATE_HOST_RULES: |
             [
               {
+                matchHost: "docker.io",
+                hostType: "docker",
+                username: "${{ inputs.docker-username }}",
+                password: "${{ inputs.docker-token }}",
+              },
+              {
                 matchHost: "${{ inputs.registry }}",
                 hostType: "docker",
                 username: "oauth2accesstoken",
-                password: "${{ steps.auth.outputs.access_token }}"
-              }
+                password: "${{ steps.auth.outputs.access_token }}",
+              },
             ]
         with:
           token: ${{ steps.generate-token.outputs.token }}

@@ -8,6 +8,16 @@ on:
         description: '["some-runners"]'
         required: true
         type: string
+      docker-username:
+        description: "docker username"
+        required: false
+        type: string
+        default: ""
+      docker-token:
+        description: "docker token"
+        required: false
+        type: string
+        default: ""
       platforms:
         description: "define multi-platform images"
         required: false
@@ -58,6 +68,14 @@ jobs:
           app-id: ${{ secrets.github-app-id }}
           private-key: ${{ secrets.github-app-key }}
           owner: ${{ github.repository_owner }}
+
+      # https://github.com/marketplace/actions/docker-login
+      - name: login to docker
+        if: ${{ inputs.docker-username && inputs.docker-token }}
+        uses: docker/login-action@v3.3.0
+        with:
+          username: ${{ inputs.docker-username }}
+          password: ${{ inputs.docker-token }}
 
       # https://github.com/marketplace/actions/build-and-push-docker-images
       - name: build docker image
