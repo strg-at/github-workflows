@@ -13,16 +13,6 @@ on:
         required: false
         type: string
         default: ".github/renovate.json5"
-      docker-username:
-        description: "docker username"
-        required: false
-        type: string
-        default: ""
-      docker-token:
-        description: "docker token"
-        required: false
-        type: string
-        default: ""
       workload-identity-provider:
         description: "projects/<number>/locations/global/..."
         required: true
@@ -52,6 +42,12 @@ on:
       github-app-key:
         description: "github app private key"
         required: true
+      docker-username:
+        description: "docker username"
+        required: false
+      docker-token:
+        description: "docker token"
+        required: false
 
 jobs:
   renovate:
@@ -94,8 +90,8 @@ jobs:
               {
                 matchHost: "docker.io",
                 hostType: "docker",
-                username: "${{ inputs.docker-username }}",
-                password: "${{ inputs.docker-token }}",
+                username: "${{ secrets.docker-username }}",
+                password: "${{ secrets.docker-token }}",
               },
               {
                 matchHost: "${{ inputs.registry }}",

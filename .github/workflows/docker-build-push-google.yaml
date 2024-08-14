@@ -20,16 +20,6 @@ on:
         description: "registry url"
         required: true
         type: string
-      docker-username:
-        description: "docker username"
-        required: false
-        type: string
-        default: ""
-      docker-token:
-        description: "docker token"
-        required: false
-        type: string
-        default: ""
       gcp:
         description: "google cloud project id"
         required: true
@@ -64,13 +54,18 @@ on:
         required: false
         type: boolean
         default: false
-
     secrets:
       github-app-id:
         description: "github app id"
         required: false
       github-app-key:
         description: "github app private key"
+        required: false
+      docker-username:
+        description: "docker username"
+        required: false
+      docker-token:
+        description: "docker token"
         required: false
 
     outputs:
@@ -123,11 +118,10 @@ jobs:
 
       # https://github.com/marketplace/actions/docker-login
       - name: login to docker
-        if: ${{ inputs.docker-username && inputs.docker-token }}
         uses: docker/login-action@v3.3.0
         with:
-          username: ${{ inputs.docker-username }}
-          password: ${{ inputs.docker-token }}
+          username: ${{ secrets.docker-username }}
+          password: ${{ secrets.docker-token }}
 
       # https://github.com/marketplace/actions/docker-metadata-action
       - name: extract metadata for docker
