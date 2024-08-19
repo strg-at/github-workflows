@@ -119,7 +119,7 @@ jobs:
 
       # https://github.com/marketplace/actions/docker-login
       - name: login to docker
-        if: ${{ env.DOCKER_AUTH }}
+        if: ${{ env.DOCKER_AUTH == 'true' }}
         uses: docker/login-action@v3.3.0
         with:
           username: ${{ secrets.docker-username }}
