@@ -42,6 +42,12 @@ on:
       github-app-key:
         description: "github app private key"
         required: true
+      docker-username:
+        description: "docker username"
+        required: false
+      docker-token:
+        description: "docker token"
+        required: false
 
 jobs:
   renovate:
@@ -82,11 +88,17 @@ jobs:
           RENOVATE_HOST_RULES: |
             [
               {
+                matchHost: "docker.io",
+                hostType: "docker",
+                username: "${{ secrets.docker-username }}",
+                password: "${{ secrets.docker-token }}",
+              },
+              {
                 matchHost: "${{ inputs.registry }}",
                 hostType: "docker",
                 username: "oauth2accesstoken",
-                password: "${{ steps.auth.outputs.access_token }}"
-              }
+                password: "${{ steps.auth.outputs.access_token }}",
+              },
             ]
         with:
           token: ${{ steps.generate-token.outputs.token }}

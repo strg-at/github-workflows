@@ -54,13 +54,18 @@ on:
         required: false
         type: boolean
         default: false
-
     secrets:
       github-app-id:
         description: "github app id"
         required: false
       github-app-key:
         description: "github app private key"
+        required: false
+      docker-username:
+        description: "docker username"
+        required: false
+      docker-token:
+        description: "docker token"
         required: false
 
     outputs:
@@ -77,6 +82,7 @@ jobs:
       packages: read
       id-token: write
     env:
+      DOCKER_AUTH: ${{ secrets.docker-username != '' && secrets.docker-token != '' }}
       image-path: ${{ inputs.registry }}/${{ inputs.gcp }}/${{ inputs.repository }}/${{ inputs.subpath }}
     outputs:
       metadata: ${{ steps.meta.outputs.json }}
@@ -104,12 +110,20 @@ jobs:
           service_account: ${{ inputs.service-account }}
 
       # https://github.com/marketplace/actions/docker-login
-      - name: log into registry
-        uses: docker/login-action@v3.1.0
+      - name: login to google artifact registry
+        uses: docker/login-action@v3.3.0
         with:
           registry: ${{ inputs.registry }}
           username: oauth2accesstoken
           password: ${{ steps.auth.outputs.access_token }}
+
+      # https://github.com/marketplace/actions/docker-login
+      - name: login to docker
+        if: ${{ env.DOCKER_AUTH == 'true' }}
+        uses: docker/login-action@v3.3.0
+        with:
+          username: ${{ secrets.docker-username }}
+          password: ${{ secrets.docker-token }}
 
       # https://github.com/marketplace/actions/docker-metadata-action
       - name: extract metadata for docker
