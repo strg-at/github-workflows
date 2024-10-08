@@ -71,7 +71,7 @@ jobs:
 
       # https://github.com/marketplace/actions/setup-yq
       - name: update image tag of helm-release
-        uses: mikefarah/yq@v4.33.2
+        uses: mikefarah/yq@d2f1ae9db722ac6b0702dd7f8a08dd22722d8c2d # v4.33.3
         with:
           cmd: yq -i '.spec.values.image.tag = "${{ inputs.tag }}"' ${{ inputs.file-path }}
 
