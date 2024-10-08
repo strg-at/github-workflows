@@ -58,7 +58,7 @@ jobs:
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
-        uses: actions/checkout@v3.5.0
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       # https://github.com/marketplace/actions/authenticate-to-google-cloud
       - name: authenticate to google cloud
