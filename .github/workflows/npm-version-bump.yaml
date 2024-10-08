@@ -87,7 +87,7 @@ jobs:
       - name: create branch
         if: steps.set-branch.outcome == 'success'
         id: create-branch
-        uses: peterjgrainger/action-create-branch@v2.3.0
+        uses: peterjgrainger/action-create-branch@08259812c8ebdbf1973747f9297e332fa078d3c1 # v2.4.0
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
         with:
