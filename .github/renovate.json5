@@ -1,0 +1,8 @@
+{
+  extends: [
+    "github>strg-at/renovate-config:base.json5",
+    "github>strg-at/renovate-config//github-actions/silent-automerge.json5",
+    "github>strg-at/renovate-config//pre-commit/silent-automerge.json5",
+    "github>strg-at/renovate-config//terraform/silent-automerge.json5",
+  ],
+}
