@@ -58,12 +58,12 @@ jobs:
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
-        uses: actions/checkout@v3.5.0
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3.5.0
 
       # https://github.com/marketplace/actions/authenticate-to-google-cloud
       - name: authenticate to google cloud
         id: auth
-        uses: "google-github-actions/auth@v1.0.0"
+        uses: "google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d" # v1.0.0
         with:
           token_format: "access_token"
           workload_identity_provider: ${{ inputs.workload-identity-provider }}
@@ -72,7 +72,7 @@ jobs:
       # https://github.com/marketplace/actions/docker-image-tag-exists
       - name: inspect
         id: inspect
-        uses: tyriis/docker-image-tag-exists@v2.0.1
+        uses: tyriis/docker-image-tag-exists@49cd47e11a5fb368696d68284ca7fecce53fcc43 # v2.0.1
         env:
           NODE_LOG_LEVEL: debug
         with:

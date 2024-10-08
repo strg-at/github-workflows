@@ -46,20 +46,20 @@ jobs:
       # https://github.com/marketplace/actions/create-github-app-token
       - name: generate token
         id: generate-token
-        uses: actions/create-github-app-token@v1.10.3
+        uses: actions/create-github-app-token@31c86eb3b33c9b601a1f60f98dcbfd1d70f379b4 # v1.10.3
         with:
           app-id: ${{ secrets.github-app-id }}
           private-key: ${{ secrets.github-app-key }}
 
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           token: ${{ steps.generate-token.outputs.token }}
 
       # https://github.com/marketplace/actions/renovate-bot-github-action
       - name: renovate bot
-        uses: renovatebot/github-action@v40.2.4
+        uses: renovatebot/github-action@76d49712364696a06b60e8647df46b288fff0ddc # v40.2.4
         env:
           LOG_LEVEL: ${{ inputs.log-level }}
           RENOVATE_DRY_RUN: ${{ inputs.dry-run }}

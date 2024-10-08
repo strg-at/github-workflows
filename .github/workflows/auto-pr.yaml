@@ -35,11 +35,11 @@ jobs:
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
-        uses: actions/checkout@v4.1.2
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       # https://github.com/marketplace/actions/pull-request-action
       - name: create pr
-        uses: vsoch/pull-request-action@1.1.0
+        uses: vsoch/pull-request-action@0969c26295afdeffaab628fee287a98b27eca529 # 1.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_REQUEST_BRANCH: ${{ inputs.branch }}
