@@ -99,7 +99,7 @@ jobs:
 
       # https://github.com/marketplace/actions/create-pull-request
       - name: create pr
-        uses: peter-evans/create-pull-request@v5.0.0
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
         if: ${{ inputs.create-pr }}
         with:
           token: ${{ steps.generate-token.outputs.token }}
