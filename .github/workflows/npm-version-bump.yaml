@@ -55,7 +55,7 @@ jobs:
       # https://github.com/marketplace/actions/setup-yq
       - name: get package-version
         id: package-version
-        uses: mikefarah/yq@v4.33.2
+        uses: mikefarah/yq@d2f1ae9db722ac6b0702dd7f8a08dd22722d8c2d # v4.33.3
         with:
           cmd: |
             echo "version=$(cat package.json | yq '.version' | tr -d '"')" >> ${GITHUB_OUTPUT}
