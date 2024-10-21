@@ -35,7 +35,7 @@ jobs:
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
-        uses: actions/checkout@v4.1.2
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       # https://github.com/marketplace/actions/pull-request-action
       - name: create pr
