@@ -72,7 +72,7 @@ jobs:
       # https://github.com/marketplace/actions/docker-image-tag-exists
       - name: inspect
         id: inspect
-        uses: tyriis/docker-image-tag-exists@v2.0.1
+        uses: tyriis/docker-image-tag-exists@0892d5ee66c71582e502449ab89769c2e55df3bb # v2.0.3
         env:
           NODE_LOG_LEVEL: debug
         with:
