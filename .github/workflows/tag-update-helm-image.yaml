@@ -67,7 +67,7 @@ jobs:
 
       # https://github.com/marketplace/actions/install-gh-cli
       - name: install github cli
-        uses: dev-hanz-ops/install-gh-cli-action@v0.1.0
+        uses: dev-hanz-ops/install-gh-cli-action@8fff9050dae2d81b38f94500d8b74ad1d1d47410 # v0.2.0
 
       # https://github.com/marketplace/actions/setup-yq
       - name: update image tag of helm-release
