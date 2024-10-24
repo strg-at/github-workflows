@@ -39,11 +39,11 @@ jobs:
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
-        uses: actions/checkout@v3.5.0
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3.5.0
 
       # https://github.com/marketplace/actions/setup-node-js-environment
       - name: setup node.js
-        uses: actions/setup-node@v3.6.0
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -55,7 +55,7 @@ jobs:
       # https://github.com/marketplace/actions/setup-yq
       - name: get package-version
         id: package-version
-        uses: mikefarah/yq@v4.33.2
+        uses: mikefarah/yq@d5bbe5bea564beb9c7f30471e63d51cac95d1304 # v4.33.2
         with:
           cmd: |
             echo "version=$(cat package.json | yq '.version' | tr -d '"')" >> ${GITHUB_OUTPUT}
@@ -69,7 +69,7 @@ jobs:
       # https://github.com/marketplace/actions/create-github-app-token
       - name: generate token
         id: generate-token
-        uses: actions/create-github-app-token@v1.10.3
+        uses: actions/create-github-app-token@31c86eb3b33c9b601a1f60f98dcbfd1d70f379b4 # v1.10.3
         with:
           app-id: ${{ secrets.github-app-id }}
           private-key: ${{ secrets.github-app-key }}
@@ -87,7 +87,7 @@ jobs:
       - name: create branch
         if: steps.set-branch.outcome == 'success'
         id: create-branch
-        uses: peterjgrainger/action-create-branch@v2.3.0
+        uses: peterjgrainger/action-create-branch@64aa569aea81305305c6e92bd236d8c427debff8 # v2.3.0
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
         with:
@@ -97,7 +97,7 @@ jobs:
       # https://github.com/marketplace/actions/multi-file-commit
       - name: multi-file-commit
         id: multi-file-commit
-        uses: tyriis/multi-file-commit@v0.3.14
+        uses: tyriis/multi-file-commit@923a5965f42ba24546ff393c12aa3203b8b3855b # v0.3.14
         with:
           token: ${{ steps.generate-token.outputs.token }}
           ref: ${{ env.RELEASE_BRANCH }}

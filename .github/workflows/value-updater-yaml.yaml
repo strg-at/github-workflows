@@ -67,18 +67,18 @@ jobs:
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       # https://github.com/marketplace/actions/setup-yq
       - name: update value
-        uses: mikefarah/yq@v4.35.2
+        uses: mikefarah/yq@a198f72367ce9da70b564a2cc25399de8e27bf37 # v4.35.2
         with:
           cmd: yq -i '${{ inputs.value-path }} = "${{ inputs.value }}"' ${{ inputs.file-path }}
 
       # https://github.com/marketplace/actions/create-github-app-token
       - name: generate token
         id: generate-token
-        uses: actions/create-github-app-token@v1.10.3
+        uses: actions/create-github-app-token@31c86eb3b33c9b601a1f60f98dcbfd1d70f379b4 # v1.10.3
         with:
           app-id: ${{ secrets.github-app-id }}
           private-key: ${{ secrets.github-app-key }}
@@ -96,7 +96,7 @@ jobs:
       # https://github.com/marketplace/actions/create-branch
       - name: create branch
         if: ${{ inputs.create-pr && steps.branch-exists.outputs.branch_exists == 'false' }}
-        uses: peterjgrainger/action-create-branch@v2.4.0
+        uses: peterjgrainger/action-create-branch@08259812c8ebdbf1973747f9297e332fa078d3c1 # v2.4.0
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
         with:
@@ -106,7 +106,7 @@ jobs:
       # https://github.com/marketplace/actions/multi-file-commit
       - name: multi-file-commit
         id: multi-file-commit
-        uses: tyriis/multi-file-commit@v0.3.14
+        uses: tyriis/multi-file-commit@923a5965f42ba24546ff393c12aa3203b8b3855b # v0.3.14
         with:
           token: ${{ steps.generate-token.outputs.token }}
           ref: ${{ inputs.commit-branch }}
@@ -115,7 +115,7 @@ jobs:
       # https://github.com/marketplace/actions/pull-request-action
       - name: create pr
         if: ${{ inputs.create-pr }}
-        uses: vsoch/pull-request-action@1.1.0
+        uses: vsoch/pull-request-action@0969c26295afdeffaab628fee287a98b27eca529 # 1.1.0
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           PULL_REQUEST_BRANCH: ${{ inputs.target-branch }}
