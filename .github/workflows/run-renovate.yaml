@@ -59,7 +59,7 @@ jobs:
 
       # https://github.com/marketplace/actions/renovate-bot-github-action
       - name: renovate bot
-        uses: renovatebot/github-action@v40.2.4
+        uses: renovatebot/github-action@80eaf969abf68ad62aa94d9ab392421b31621634 # v40.3.4
         env:
           LOG_LEVEL: ${{ inputs.log-level }}
           RENOVATE_DRY_RUN: ${{ inputs.dry-run }}
