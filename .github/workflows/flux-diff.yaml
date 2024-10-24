@@ -117,7 +117,7 @@ jobs:
 
       # https://github.com/allenporter/flux-local
       - name: diff resources
-        uses: docker://ghcr.io/allenporter/flux-local:v5.1.0@sha256:0e956a1b4b7c7da8e9a9451c85db66f3613dcadd6dcf6b0813d7b459d51514f4
+        uses: docker://ghcr.io/allenporter/flux-local:v6.0.0@sha256:03155db7e8e0e924c1cb208678d62fa72b82de494293723b2015c19810c50b59
         with:
           args: >-
             diff ${{ matrix.resources }}
