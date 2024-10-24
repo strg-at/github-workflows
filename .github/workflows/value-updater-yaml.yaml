@@ -115,7 +115,7 @@ jobs:
       # https://github.com/marketplace/actions/pull-request-action
       - name: create pr
         if: ${{ inputs.create-pr }}
-        uses: vsoch/pull-request-action@1.1.0
+        uses: vsoch/pull-request-action@882391869b75196e039a732df05085312c456995 # 1.1.1
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           PULL_REQUEST_BRANCH: ${{ inputs.target-branch }}
