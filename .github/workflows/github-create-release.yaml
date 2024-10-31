@@ -39,6 +39,6 @@ jobs:
 
       # https://github.com/marketplace/actions/gh-release
       - name: create release
-        uses: softprops/action-gh-release@v0.1.15
+        uses: softprops/action-gh-release@e7a8f85e1c67a31e6ed99a94b41bd0b71bbee6b8 # v2.0.9
         with:
           token: ${{ steps.generate-token.outputs.token }}
