@@ -63,7 +63,7 @@ jobs:
 
       # https://github.com/marketplace/actions/set-up-gcloud-cloud-sdk-environment
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1.1.1
+        uses: google-github-actions/setup-gcloud@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2
         with:
           # Workload Identity Federation requires version 363.0.0 or newer.
           version: ">= 363.0.0"
