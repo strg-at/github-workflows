@@ -111,7 +111,7 @@ jobs:
 
       # https://github.com/marketplace/actions/docker-login
       - name: login to google artifact registry
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           registry: ${{ inputs.registry }}
           username: oauth2accesstoken
@@ -120,7 +120,7 @@ jobs:
       # https://github.com/marketplace/actions/docker-login
       - name: login to docker
         if: ${{ env.DOCKER_AUTH == 'true' }}
-        uses: docker/login-action@v3.3.0
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
         with:
           username: ${{ secrets.docker-username }}
           password: ${{ secrets.docker-token }}

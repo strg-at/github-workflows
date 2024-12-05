@@ -62,6 +62,6 @@ jobs:
       # https://github.com/marketplace/actions/oskar-phpstan
       - name: php-stan
         if: ${{ inputs.php-stan }}
-        uses: docker://oskarstark/phpstan-ga:1.8.0
+        uses: docker://oskarstark/phpstan-ga:1.8.0@sha256:72a23af2ecba7f895b1e9d18ac9157e97cb703ae694cb129cca01bc9e5801022
         with:
           args: ${{ inputs.php-stan-cmd }}
