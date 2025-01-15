@@ -80,6 +80,6 @@ repos:
           - .prettierrc.yaml
 
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.23.0
+    rev: v8.23.1
     hooks:
       - id: gitleaks
