@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
 vars:
@@ -7,3 +8,11 @@ vars:
 
 includes:
   pre-commit: .taskfiles/pre-commit.yaml
+
+tasks:
+  lint:
+    desc: lint codebase
+    dir: "{{.PROJECT_DIR}}"
+    cmds:
+      - task: pre-commit:init
+      - task: pre-commit:run
