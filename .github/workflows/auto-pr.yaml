@@ -9,12 +9,12 @@ on:
         type: string
       branch:
         description: "branch to create pull request for"
-        required: true
+        required: false
         type: string
         default: "main"
       update:
         description: "update pull request if it exists"
-        required: true
+        required: false
         type: string
         default: "true"
       pr-title:
