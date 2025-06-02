@@ -9,17 +9,25 @@ on:
         required: true
         type: string
       files:
-        description: "include specific files using patterns"
+        description: "files and directories to check for changes, full repo if unset"
         required: false
         type: string
       matrix:
+        description: "enable matrix output for changed files"
         required: false
         type: boolean
-        default: false
       dir_names:
+        description: "output unique changed directories instead of files"
         required: false
         type: boolean
-        default: false
+      dir_names_exclude_current_dir:
+        description: "exclude working directory from output"
+        required: false
+        type: boolean
+      dir_names_max_depth:
+        description: "maximum depth of directories to include in output"
+        required: false
+        type: string
 
     outputs:
       files:
@@ -47,6 +55,8 @@ jobs:
           files: ${{ inputs.files }}
           matrix: ${{ inputs.matrix }}
           dir_names: ${{ inputs.dir_names }}
+          dir_names_exclude_current_dir: ${{ inputs.dir_names_exclude_current_dir }}
+          dir_names_max_depth: ${{ inputs.dir_names_max_depth }}
 
       - name: list all changed files
         run: |
