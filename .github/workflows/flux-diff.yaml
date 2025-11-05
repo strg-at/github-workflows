@@ -101,7 +101,7 @@ jobs:
       # https://github.com/alexellis/arkade-get
       - name: install flux
         if: ${{ inputs.flux-cluster-repo }}
-        uses: alexellis/arkade-get@88abff469636be1bd282cff079d75973cdb69cd1
+        uses: alexellis/arkade-get@3df9efb151cd9ec08d0b3640999d4dd42ff6b3f3
         with:
           print-summary: false
           flux: latest
