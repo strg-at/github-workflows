@@ -50,7 +50,7 @@ jobs:
       # send event to remote repo to update helm-release image tag
       # https://github.com/marketplace/actions/repository-dispatch
       - name: repository dispatch
-        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         env:
           token: ${{ steps.generate-token.outputs.token }}
           tag: ${{ inputs.tag }}
