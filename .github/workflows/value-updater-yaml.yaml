@@ -71,7 +71,7 @@ jobs:
 
       # https://github.com/marketplace/actions/setup-yq
       - name: update value
-        uses: mikefarah/yq@6251e95af8df3505def48c71f3119836701495d6 # v4.47.2
+        uses: mikefarah/yq@796317b885ae219215caa36e9bdacc87c9962c15 # v4.48.2
         with:
           cmd: yq -i '${{ inputs.value-path }} = "${{ inputs.value }}"' ${{ inputs.file-path }}
 
