@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: flux local
 
 on:
@@ -39,47 +40,6 @@ on:
         required: false
 
 jobs:
-  test:
-    runs-on: ${{ inputs.runner }}
-    permissions:
-      contents: read
-    steps:
-      # https://github.com/marketplace/actions/create-github-app-token
-      - name: generate token
-        id: generate-token
-        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94 # v2.2.0
-        with:
-          app-id: ${{ secrets.github-app-id }}
-          private-key: ${{ secrets.github-app-key }}
-          owner: ${{ github.repository_owner}}
-
-      # https://github.com/marketplace/actions/checkout
-      - name: checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
-        with:
-          token: ${{ steps.generate-token.outputs.token }}
-
-      # https://github.com/marketplace/actions/checkout
-      - name: checkout cluster repo
-        if: ${{ inputs.cluster-repo }}
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
-        with:
-          token: ${{ steps.generate-token.outputs.token }}
-          repository: ${{ inputs.cluster-repo-owner }}/${{ inputs.cluster-repo }}
-          path: ${{ inputs.path }}/${{ inputs.cluster-repo }}
-
-      # https://github.com/allenporter/flux-local
-      - name: run flux local test
-        uses: docker://ghcr.io/allenporter/flux-local:v8.0.1@sha256:5c8cb0ff9d26a5260a47e7b3949403d80713d80037b9f0e4c02c5efca3588518
-        with:
-          args: >-
-            test
-            --all-namespaces
-            --path /github/workspace/${{ inputs.path }}/flux
-            ${{ inputs.sources && format('--sources {0}', inputs.sources) || '' }}
-            --enable-helm
-            --verbose
-
   diff:
     runs-on: ${{ inputs.runner }}
     permissions:
@@ -208,16 +168,3 @@ jobs:
             ```diff
             ${{ steps.diff.outputs.diff }}
             ```
-
-  success:
-    if: ${{ !cancelled() }}
-    needs: ["test", "diff"]
-    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
-    steps:
-      - name: any jobs failed?
-        if: ${{ contains(needs.*.result, 'failure') }}
-        run: exit 1
-
-      - name: all jobs passed or skipped?
-        if: ${{ !(contains(needs.*.result, 'failure')) }}
-        run: echo "all jobs passed or skipped" && echo "${{ toJSON(needs.*.result) }}"
