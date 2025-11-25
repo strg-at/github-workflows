@@ -18,7 +18,7 @@ on:
         type: string
         default: '["helmrelease", "kustomization"]'
       sources:
-        description: starting point of flux source path (f.e. flux-devenv=./oci)
+        description: starting point of flux source path (f.e. flux-system=./oci)
         required: false
         type: string
       cluster-repo-owner:
