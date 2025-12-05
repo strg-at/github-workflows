@@ -30,6 +30,11 @@ on:
         description: "path to Dockerfile"
         required: false
         type: string
+      free-disk-space:
+        description: "boolean to free disk space before build - default false"
+        required: false
+        type: boolean
+        default: false
       context:
         description: "build context - default ."
         required: false
@@ -82,6 +87,15 @@ jobs:
         with:
           images: ${{ env.image-path }}
           tags: ${{ inputs.tags }}
+
+      # https://github.com/marketplace/actions/free-disk-space-ubuntu-runners
+      - name: free disk space
+        if: ${{ inputs.free-disk-space }}
+        uses: endersonmenezes/free-disk-space@v3
+        with:
+          remove_android: true
+          remove_dotnet: true
+          remove_haskell: true
 
       # https://github.com/marketplace/actions/build-and-push-docker-images
       - name: build and push docker image
