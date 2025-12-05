@@ -21,12 +21,12 @@ on:
         required: false
         type: string
         default: .
-      generate-token:
+      free-disk-space:
+        description: "boolean to free disk space before build - default false"
         required: false
         type: boolean
         default: false
-      free-disk-space:
-        description: "boolean to free disk space before build - default false"
+      generate-token:
         required: false
         type: boolean
         default: false

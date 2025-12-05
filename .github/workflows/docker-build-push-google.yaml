@@ -45,6 +45,11 @@ on:
         description: "path to Dockerfile"
         required: false
         type: string
+      free-disk-space:
+        description: "boolean to free disk space before build - default false"
+        required: false
+        type: boolean
+        default: false
       context:
         description: "build context - default ."
         required: false
@@ -142,6 +147,19 @@ jobs:
           app-id: ${{ secrets.github-app-id }}
           private-key: ${{ secrets.github-app-key }}
           owner: ${{ github.repository_owner }}
+
+      # https://github.com/jlumbroso/free-disk-space
+      - name: free disk space
+        if: ${{ inputs.free-disk-space }}
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          docker-images: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          swap-storage: false
 
       # https://github.com/marketplace/actions/build-and-push-docker-images
       - name: build and push docker image
