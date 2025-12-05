@@ -91,7 +91,7 @@ jobs:
       # https://github.com/marketplace/actions/free-disk-space-ubuntu-runners
       - name: free disk space
         if: ${{ inputs.free-disk-space }}
-        uses: endersonmenezes/free-disk-space@v3
+        uses: endersonmenezes/free-disk-space@6c4664f43348c8c7011b53488d5ca65e9fc5cd1a # v3
         with:
           remove_android: true
           remove_dotnet: true
