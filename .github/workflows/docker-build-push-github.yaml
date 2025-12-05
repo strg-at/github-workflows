@@ -88,7 +88,7 @@ jobs:
           images: ${{ env.image-path }}
           tags: ${{ inputs.tags }}
 
-      # https://github.com/jlumbroso/free-disk-space
+      # https://github.com/marketplace/actions/free-disk-space-ubuntu-runners
       - name: free disk space
         if: ${{ inputs.free-disk-space }}
         uses: endersonmenezes/free-disk-space@v3
