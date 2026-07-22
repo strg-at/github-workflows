@@ -8,14 +8,6 @@ on:
         description: '["some-runners"]'
         required: true
         type: string
-      files:
-        description: "files and directories to check for changes, full repo if unset"
-        required: false
-        type: string
-      matrix:
-        description: "enable matrix output for changed files"
-        required: false
-        type: boolean
       dir_names:
         description: "output unique changed directories instead of files"
         required: false
@@ -28,8 +20,23 @@ on:
         description: "maximum depth of directories to include in output"
         required: false
         type: string
+      files:
+        description: "files and directories to check for changes, full repo if unset"
+        required: false
+        type: string
+      files-yaml:
+        description: "named groups of file patterns to detect changes for"
+        required: false
+        type: string
+      matrix:
+        description: "output as JSON array instead of space-separated string"
+        required: false
+        type: boolean
 
     outputs:
+      changed-keys:
+        description: "changed files-yaml group keys"
+        value: ${{ jobs.get-changed-files.outputs.changed-keys }}
       files:
         description: "all changed files"
         value: ${{ jobs.get-changed-files.outputs.files }}
@@ -40,6 +47,7 @@ jobs:
     permissions:
       contents: read
     outputs:
+      changed-keys: ${{ steps.changed-files.outputs.changed_keys }}
       files: ${{ steps.changed-files.outputs.all_changed_files }}
 
     steps:
@@ -52,11 +60,12 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
-          files: ${{ inputs.files }}
-          matrix: ${{ inputs.matrix }}
           dir_names: ${{ inputs.dir_names }}
           dir_names_exclude_current_dir: ${{ inputs.dir_names_exclude_current_dir }}
           dir_names_max_depth: ${{ inputs.dir_names_max_depth }}
+          files: ${{ inputs.files }}
+          files_yaml: ${{ inputs.files-yaml }}
+          matrix: ${{ inputs.matrix }}
 
       - name: list all changed files
         run: |
