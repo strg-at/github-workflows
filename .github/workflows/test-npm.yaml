@@ -28,11 +28,19 @@ on:
         required: false
         type: string
         default: npm run build
+      working-directory:
+        description: "directory containing package.json, relative to repo root"
+        required: false
+        type: string
+        default: "."
 
 jobs:
   test-npm:
     name: npm
     runs-on: ${{fromJSON(inputs.runner)}}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout
@@ -46,7 +54,7 @@ jobs:
           cache-name: cache-node-modules
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles(format('{0}/package-lock.json', inputs.working-directory)) }}
 
       # https://github.com/marketplace/actions/setup-node-js-environment
       - name: setup node.js
@@ -54,6 +62,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
 
       - name: install
         run: npm ci
