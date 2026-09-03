@@ -37,6 +37,11 @@ on:
         required: true
         type: string
 
+    outputs:
+      digest:
+        description: "digest of the tagged image, f.e. sha256:abcdef..."
+        value: ${{ jobs.tag-image-google.outputs.digest }}
+
 jobs:
   tag-image-google:
     name: google
@@ -46,6 +51,8 @@ jobs:
       id-token: write
     env:
       base-path: ${{ inputs.registry }}/${{ inputs.gcp }}/${{ inputs.repository }}
+    outputs:
+      digest: ${{ steps.retag.outputs.digest }}
 
     steps:
       # https://github.com/marketplace/actions/checkout
@@ -69,7 +76,13 @@ jobs:
           version: ">= 363.0.0"
 
       - name: retag image
+        id: retag
         run: |
           gcloud container images add-tag \
             ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }} \
             ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
+
+          digest=$(gcloud container images describe \
+            ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }} \
+            --format='value(image_summary.digest)')
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"

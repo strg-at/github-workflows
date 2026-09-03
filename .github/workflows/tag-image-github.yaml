@@ -26,6 +26,11 @@ on:
         required: true
         type: string
 
+    outputs:
+      digest:
+        description: "digest of the tagged image, f.e. sha256:abcdef..."
+        value: ${{ jobs.tag-image-github.outputs.digest }}
+
 jobs:
   tag-image-github:
     name: github
@@ -36,8 +41,14 @@ jobs:
       packages: write
     env:
       base-path: ${{ inputs.registry }}/${{ inputs.repository }}
+    outputs:
+      digest: ${{ steps.retag.outputs.digest }}
 
     steps:
+      # https://github.com/marketplace/actions/docker-setup-buildx
+      - name: setup docker buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
       # https://github.com/marketplace/actions/docker-login
       - name: log into registry
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
@@ -47,7 +58,13 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: retag image
+        id: retag
         run: |
-          docker pull ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }}
-          docker tag ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }} ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
-          docker push ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }}
+          docker buildx imagetools create --prefer-index=false \
+            --tag ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }} \
+            ${{ env.base-path }}/${{ inputs.source-path }}:${{ github.sha }}
+
+          digest=$(docker buildx imagetools inspect \
+            ${{ env.base-path }}/${{ inputs.target-path }}:${{ github.ref_name }} \
+            --format '{{json .}}' | jq -r '.manifest.digest')
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
