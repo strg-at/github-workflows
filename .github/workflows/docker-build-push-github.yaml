@@ -45,6 +45,9 @@ on:
       metadata:
         description: "docker metadata"
         value: ${{ jobs.docker-build-push-github.outputs.metadata }}
+      digest:
+        description: "digest of the pushed image, f.e. sha256:abcdef..."
+        value: ${{ jobs.docker-build-push-github.outputs.digest }}
 
 jobs:
   docker-build-push-github:
@@ -58,11 +61,14 @@ jobs:
       image-path: ${{ inputs.registry }}/${{ github.repository }}/${{ inputs.subpath }}
     outputs:
       metadata: ${{ steps.meta.outputs.json }}
+      digest: ${{ steps.build-and-push.outputs.digest }}
 
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # https://github.com/marketplace/actions/cosign-installer
       - name: setup cosign
