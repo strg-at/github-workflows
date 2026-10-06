@@ -1,0 +1,83 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: flate
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: runner name
+        type: string
+        required: true
+      path:
+        description: full path to flux sync
+        required: true
+        type: string
+
+    secrets:
+      github-app-client-id:
+        description: github app client id
+        required: true
+      github-app-key:
+        description: github app private key
+        required: true
+
+jobs:
+  diff:
+    name: flate diff
+    runs-on: ${{ inputs.runner }}
+    permissions:
+      contents: read
+    steps:
+      # https://github.com/marketplace/actions/create-github-app-token
+      - name: generate token
+        id: generate-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ secrets.github-app-client-id }}
+          private-key: ${{ secrets.github-app-key }}
+          permission-pull-requests: write
+
+      # https://github.com/marketplace/actions/sticky-pull-request-comment
+      - name: clear comment
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          header: ${{ github.event.pull_request.number }}/flate-diff
+          message: |
+            ### flate diff - generating...
+
+      # https://github.com/marketplace/actions/checkout
+      - name: checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # https://github.com/home-operations/flate/tree/631b76b69c4e58c6f4d1cb01e23616fa61aebafa/action
+      - name: setup flate
+        uses: home-operations/flate/action@631b76b69c4e58c6f4d1cb01e23616fa61aebafa # v0.6.5
+
+      - name: run flate
+        env:
+          FLATE_PATH: ${{ inputs.path }}
+        run: |
+          DIFF=$(flate diff all -o github)
+          {
+            echo "### flate diff"
+            if [[ -n $DIFF ]]; then
+              echo '````diff'
+              echo "$DIFF"
+              echo '````'
+            else
+              echo 'no changes found'
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY" > "$RUNNER_TEMP/flate-diff.md"
+
+      # https://github.com/marketplace/actions/sticky-pull-request-comment
+      - name: add comment
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          header: ${{ github.event.pull_request.number }}/flate-diff
+          path: ${{ runner.temp }}/flate-diff.md
