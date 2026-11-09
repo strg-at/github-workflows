@@ -61,6 +61,7 @@ jobs:
       - name: run flate
         env:
           FLATE_PATH: ${{ inputs.path }}
+          FLATE_ALLOW_MISSING_KINDS: Secret
         run: |
           DIFF=$(flate diff all -o github)
           {
