@@ -1,5 +1,7 @@
 ---
 fail_fast: false
+default_language_version:
+  node: lts
 default_stages:
   - pre-commit
   - pre-push
