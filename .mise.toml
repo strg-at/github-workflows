@@ -1,5 +1,5 @@
 [tools]
 "aqua:koalaman/shellcheck" = "0.11.0"
 "aqua:rhysd/actionlint" = "1.7.12"
-"github:home-operations/flate" = "0.7.1"
+"github:home-operations/flate" = "0.7.3"
 "pipx:pyflakes" = "4.1.0"
