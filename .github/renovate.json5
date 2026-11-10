@@ -1,8 +1,20 @@
 {
   extends: [
     "github>strg-at/renovate-config:base.json5",
-    "github>strg-at/renovate-config//dependencies/flate.json5",
     "github>strg-at/renovate-config//pre-commit/silent-automerge.json5",
     "github>strg-at/renovate-config//terraform/silent-automerge.json5",
+  ],
+  packageRules: [
+    {
+      description: "flate: group",
+      groupName: "flate",
+      matchDatasources: ["github-releases", "github-tags"],
+      matchPackageNames: ["/home-operations/flate/"],
+      semanticCommitScope: "flate",
+      group: {
+        semanticCommitScope: "flate",
+        commitMessageTopic: "group",
+      },
+    },
   ],
 }
