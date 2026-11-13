@@ -1,0 +1,111 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: update yaml value
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: runner name
+        type: string
+        required: true
+      value:
+        description: value to be updated, f.e. tag
+        type: string
+        required: true
+      value-path:
+        description: path to value, f.e. .spec.values.image.tag
+        type: string
+        required: true
+      file-path:
+        description: path to file, f.e. tag-update/testfile.yaml
+        type: string
+        required: true
+      create-pr:
+        description: create pr from commit-branch to target-branch
+        type: boolean
+        default: true
+      commit-branch:
+        description: branch where commit will be pushed to, f.e. release/1.2.3 or main
+        type: string
+        default: main
+      target-branch:
+        description: target branch of the pr, f.e. main, defaults to the repository default branch
+        type: string
+      pr-title:
+        description: "pr title, f.e. release: 1.2.3, defaults to commit-message"
+        type: string
+      commit-message:
+        description: "commit message, f.e. release: tag"
+        type: string
+        default: "chore: update"
+
+    secrets:
+      github-app-client-id:
+        description: github app client id
+        required: true
+      github-app-key:
+        description: github app private key
+        required: true
+
+jobs:
+  value-update:
+    name: yaml
+    runs-on: ${{ inputs.runner }}
+    permissions:
+      contents: read
+    steps:
+      # https://github.com/marketplace/actions/create-github-app-token
+      - name: generate token
+        id: generate-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ secrets.github-app-client-id }}
+          private-key: ${{ secrets.github-app-key }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      # https://github.com/marketplace/actions/create-branch
+      - name: create branch
+        if: ${{ inputs.create-pr }}
+        uses: peterjgrainger/action-create-branch@4b81ce657e255acd677cc6c55c9c763654be3aef # v4.0.0
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+        with:
+          branch: ${{ inputs.commit-branch }}
+
+      # https://github.com/marketplace/actions/checkout
+      - name: checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.commit-branch }}
+          persist-credentials: false
+
+      # https://github.com/marketplace/actions/setup-yq
+      - name: update value
+        uses: mikefarah/yq@504fc38780cc46be8444ea1b72fb55919fc0bfb0 # v4.54.1
+        env:
+          VALUE: ${{ inputs.value }}
+          VALUE_PATH: ${{ inputs.value-path }}
+          FILE_PATH: ${{ inputs.file-path }}
+        with:
+          cmd: yq -i "$VALUE_PATH = strenv(VALUE)" "$FILE_PATH"
+
+      # https://github.com/marketplace/actions/multi-file-commit
+      - name: multi-file-commit
+        uses: tyriis/multi-file-commit@2d6dcce35c5e8a7c2f945fb98544cfe9d6c81cc7 # v1.1.0
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          ref: ${{ inputs.commit-branch }}
+          message: ${{ inputs.commit-message }}
+
+      # https://github.com/marketplace/actions/pull-request-action
+      - name: create pr
+        if: ${{ inputs.create-pr }}
+        uses: vsoch/pull-request-action@882391869b75196e039a732df05085312c456995 # 1.1.1
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          PULL_REQUEST_BRANCH: ${{ inputs.target-branch }}
+          PULL_REQUEST_FROM_BRANCH: ${{ inputs.commit-branch }}
+          PULL_REQUEST_TITLE: ${{ inputs.pr-title || inputs.commit-message }}
+          PULL_REQUEST_UPDATE: "true"
