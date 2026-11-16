@@ -48,7 +48,7 @@ jobs:
       # https://github.com/marketplace/actions/check-php-syntax-errors
       - name: php-lint
         if: ${{ inputs.php-lint }}
-        uses: overtrue/phplint@722f95a6c8924b9e0cfcbdd1e49bb8c31c858a77 # 9.8.0
+        uses: overtrue/phplint@b8f8ad7306170c61142dc72487c58b7e667a0132 # 9.8.2
         with:
           options: ${{ inputs.php-lint-cmd }}
 
