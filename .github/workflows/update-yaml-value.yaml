@@ -35,6 +35,10 @@ on:
       pr-title:
         description: "pr title, f.e. release: 1.2.3, defaults to commit-message"
         type: string
+      pr-body:
+        description: pr body, defaults to empty
+        type: string
+        default: ""
       commit-message:
         description: "commit message, f.e. release: tag"
         type: string
@@ -93,7 +97,7 @@ jobs:
 
       # https://github.com/marketplace/actions/multi-file-commit
       - name: multi-file-commit
-        uses: tyriis/multi-file-commit@cbb63a3188149ba951147f387c0ef09e9f1d33c2 # main
+        uses: tyriis/multi-file-commit@7bf613b8f7c63daf815d5e4d9eb68b8dead5e6a3 # v1.2.0
         with:
           token: ${{ steps.generate-token.outputs.token }}
           ref: ${{ inputs.commit-branch }}
@@ -108,4 +112,5 @@ jobs:
           PULL_REQUEST_BRANCH: ${{ inputs.target-branch }}
           PULL_REQUEST_FROM_BRANCH: ${{ inputs.commit-branch }}
           PULL_REQUEST_TITLE: ${{ inputs.pr-title || inputs.commit-message }}
+          PULL_REQUEST_BODY: ${{ inputs.pr-body }}
           PULL_REQUEST_UPDATE: "true"
