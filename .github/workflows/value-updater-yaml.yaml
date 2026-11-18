@@ -106,7 +106,7 @@ jobs:
       # https://github.com/marketplace/actions/multi-file-commit
       - name: multi-file-commit
         id: multi-file-commit
-        uses: tyriis/multi-file-commit@2d6dcce35c5e8a7c2f945fb98544cfe9d6c81cc7 # v1.1.0
+        uses: tyriis/multi-file-commit@7bf613b8f7c63daf815d5e4d9eb68b8dead5e6a3 # v1.2.0
         with:
           token: ${{ steps.generate-token.outputs.token }}
           ref: ${{ inputs.commit-branch }}
